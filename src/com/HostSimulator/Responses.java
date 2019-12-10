@@ -115,8 +115,7 @@ public class Responses {
 			break;
 		case "PartiallyApprove":
 			bitfield4 = Integer.toString(Integer.parseInt(requestBitfieldsWithValues.get("BITFIELD4")) / 2);
-			// Bitfield4 has a fixed length of 12 digits and has to have 0's
-			// for the digits missing.
+			// Bitfield4 has a fixed length of 12 digits and has to have 0's for the digits missing.
 			int length = bitfield4.length();
 			String tempString = "";
 			for (int i = 0; i < 12 - length; i++) {
