@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class Responses {
 
-	private String requestPacket, sTAN, transactionTimeStamp, eHeader, requestMTI;
+	private String requestPacket, sTAN, transactionTimeStamp, eHeader, requestMTI, test;
 	Map<String, String> requestBitfieldsWithValues, responseBitfieldswithValue;
 	HexDecoder decoder;
 
@@ -176,7 +176,7 @@ public class Responses {
 	// ------------------------------------------------------------------------------------------------------------------
 	public String financialMessageResponse() {
 		// approveTransaction can have values Approve,Decline,PartiallyApprove
-		String approveTransaction = "Approve";
+		String approveTransaction = "PartiallyApprove";
 		String responsePacket = "", bitmap, bitfield4 = "", bitfield38 = "", bitfield39 = "", bitfield44 = "",
 				bitfield54 = "6501840C000000010000", elementsInTransaction, responseMTI = "";
 		if (requestMTI.equals("1200")) {
@@ -193,7 +193,7 @@ public class Responses {
 			bitfield39 = "000";
 			break;
 		case "Decline":
-			bitfield39 = "107";
+			bitfield39 = "100";
 			bitfield44 = "0705";
 			break;
 		case "PartiallyApprove":
