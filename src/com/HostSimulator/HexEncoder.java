@@ -69,7 +69,7 @@ public class HexEncoder {
 			Converter converter = new Converter();
 			MTItoHex = converter.asciitoHex(MTI);
 			eHeaderToHex = converter.asciitoHex(eHeader);
-			// elementsInTransaction = pickElementsInTransaction();
+			//elementsInTransaction = pickElementsInTransaction();
 			// bitmap = generateBinaryData(elementsInTransaction);
 			bitmapToHex = converter.binaryToHex(bitmap);
 			bitfieldValues = generateBitFieldValues();

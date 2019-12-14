@@ -12,10 +12,11 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 public class Responses {
 
-	private String requestPacket, sTAN, transactionTimeStamp, eHeader, requestMTI, test;
+	private String requestPacket, sTAN, transactionTimeStamp, eHeader, requestMTI;
 	Map<String, String> requestBitfieldsWithValues, responseBitfieldswithValue;
 	HexDecoder decoder;
 
@@ -177,6 +178,7 @@ public class Responses {
 	public String financialMessageResponse() {
 		// approveTransaction can have values Approve,Decline,PartiallyApprove
 		String approveTransaction = "PartiallyApprove";
+		TreeSet<Integer> elements = new TreeSet<>(Arrays.asList(2,3));
 		String responsePacket = "", bitmap, bitfield4 = "", bitfield38 = "", bitfield39 = "", bitfield44 = "",
 				bitfield54 = "6501840C000000010000", elementsInTransaction, responseMTI = "";
 		if (requestMTI.equals("1200")) {
