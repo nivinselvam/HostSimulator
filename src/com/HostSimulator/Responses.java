@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class Responses {
@@ -58,7 +59,7 @@ public class Responses {
 		requestBitfieldsWithValues = decoder.getBitFieldwithValues();
 		System.out.println("Request Packet");
 		decoder.printEncodedData();
-		responseBitfieldswithValue = new LinkedHashMap<>();
+		responseBitfieldswithValue = new TreeMap<>(new BitfieldComparator());
 		switch (requestMTI) {
 		case "1100":
 			responsePacket = authorizationMessageResponse();
@@ -177,7 +178,7 @@ public class Responses {
 	// ------------------------------------------------------------------------------------------------------------------
 	public String financialMessageResponse() {
 		// approveTransaction can have values Approve,Decline,PartiallyApprove
-		String approveTransaction = "PartiallyApprove";
+		String approveTransaction = "Decline";
 		TreeSet<Integer> elements = new TreeSet<>(Arrays.asList(2,3));
 		String responsePacket = "", bitmap, bitfield4 = "", bitfield38 = "", bitfield39 = "", bitfield44 = "",
 				bitfield54 = "6501840C000000010000", elementsInTransaction, responseMTI = "";
