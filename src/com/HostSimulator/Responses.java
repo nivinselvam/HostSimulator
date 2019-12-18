@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class Responses {
 
@@ -29,8 +31,8 @@ public class Responses {
 
 	// ----------------------------------------------------------------------------------------------------------------
 	/*
-	 * This method generates the response packet for echo request Takes
-	 * StringBuffer as input and returns response packet as String.
+	 * This method generates the response packet for echo request Takes StringBuffer
+	 * as input and returns response packet as String.
 	 */
 	// ----------------------------------------------------------------------------------------------------------------
 	public String echoMessageResponse() {
@@ -57,7 +59,7 @@ public class Responses {
 		requestBitfieldsWithValues = decoder.getBitFieldwithValues();
 		System.out.println("Request Packet");
 		decoder.printEncodedData();
-		responseBitfieldswithValue = new LinkedHashMap<>();
+		responseBitfieldswithValue = new TreeMap<>(new BitfieldComparator());
 		switch (requestMTI) {
 		case "1100":
 			responsePacket = authorizationMessageResponse();
@@ -82,17 +84,17 @@ public class Responses {
 	// ------------------------------------------------------------------------------------------------------------------
 	/*
 	 * This method is used to generate the response for a reversal request(1100)
-	 * Authorization request could be of two types. 1) Preauth 2) Balance
-	 * Inquiry In case of balance inquiry Bitfield3 would denote the transaction
-	 * type.
+	 * Authorization request could be of two types. 1) Preauth 2) Balance Inquiry In
+	 * case of balance inquiry Bitfield3 would denote the transaction type.
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String authorizationMessageResponse() {
-		String responsePacket = "", bitmap, bitfield4 = "", bitfield38 = "", bitfield39 = "", bitfield44 = "",
-				bitfield54 = "6501840C000000010000", elementsInTransaction;
 		// approveTransaction can have values Approve,
 		// Decline,PartiallyApprove(not applicable for balance inquiry)
-		String approveTransaction = "PartiallyApprove";
+		String approveTransaction = "Approve";
+		String responsePacket = "", responseMTI = "1110", bitmap, bitfield4 = "", bitfield38 = "", bitfield39 = "",
+				bitfield44 = "", bitfield54 = "6501840C000000010000";
+		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(2, 3, 4, 11, 12, 39, 41, 42, 49));
 		String[] balanceInquiryCodes = { "313000", "318000", "318100", "309700", "319700", "316000", "313900" };
 		List<String> balanceInquiryCodesList = new ArrayList<String>(Arrays.asList(balanceInquiryCodes));
 		boolean isBalanceInquiry = false;
@@ -138,18 +140,14 @@ public class Responses {
 		}
 		responseBitfieldswithValue.put("BITFIELD11", requestBitfieldsWithValues.get("BITFIELD11"));
 		responseBitfieldswithValue.put("BITFIELD12", requestBitfieldsWithValues.get("BITFIELD12"));
-		if (approveTransaction.equals("Decline")) {
-			responseBitfieldswithValue.put("BITFIELD39", bitfield39);
-			responseBitfieldswithValue.put("BITFIELD44", bitfield44);
-			elementsInTransaction = "2 3 4 11 12 39 41 42 44 49";
-		} else {
+		if (approveTransaction.contentEquals("Approve") || approveTransaction.contentEquals("PartiallyApprove")) {
 			responseBitfieldswithValue.put("BITFIELD38", bitfield38);
-			responseBitfieldswithValue.put("BITFIELD39", bitfield39);
-			if (isBalanceInquiry) {
-				elementsInTransaction = "2 3 4 11 12 38 39 41 42 49 54";
-			} else {
-				elementsInTransaction = "2 3 4 11 12 38 39 41 42 49";
-			}
+			elementsInTransaction.add(38);
+		}
+		responseBitfieldswithValue.put("BITFIELD39", bitfield39);
+		if (approveTransaction.equals("Decline")) {
+			responseBitfieldswithValue.put("BITFIELD44", bitfield44);
+			elementsInTransaction.add(44);
 		}
 		responseBitfieldswithValue.put("BITFIELD41", requestBitfieldsWithValues.get("BITFIELD41"));
 		responseBitfieldswithValue.put("BITFIELD42", requestBitfieldsWithValues.get("BITFIELD42"));
@@ -158,8 +156,8 @@ public class Responses {
 			responseBitfieldswithValue.put("BITFIELD54", bitfield54);
 		}
 
-		HexEncoder encoder = new HexEncoder("1110", eHeader);
-		bitmap = encoder.generateBinaryData(elementsInTransaction);
+		HexEncoder encoder = new HexEncoder(responseMTI, eHeader);
+		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
 		encoder.setBitmap(bitmap);
 		encoder.setResponseBitFieldsWithValue(responseBitfieldswithValue);
 		encoder.encodeddata();
@@ -170,17 +168,26 @@ public class Responses {
 
 	// ------------------------------------------------------------------------------------------------------------------
 	/*
-	 * This method is used to generate the response for a financial
-	 * request(1200), (1220)
+	 * This method is used to generate the response for a financial request(1200),
+	 * (1220)
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String financialMessageResponse() {
 		// approveTransaction can have values Approve,Decline,PartiallyApprove
-		String approveTransaction = "Approve";
+		String approveTransaction = "PartiallyApprove";
+		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(2, 3, 4, 11, 12, 39, 41, 42, 49));
 		String responsePacket = "", bitmap, bitfield4 = "", bitfield38 = "", bitfield39 = "", bitfield44 = "",
-				bitfield54 = "6501840C000000010000", elementsInTransaction, responseMTI = "";
+				bitfield54 = "6501840C000000010000", element, responseMTI = "";
 		if (requestMTI.equals("1200")) {
 			responseMTI = "1210";
+			// Activation and Recharge transactions should not have partial approval
+			if (requestBitfieldsWithValues.get("BITFIELD3").equals("900060")
+					|| requestBitfieldsWithValues.get("BITFIELD3").equals("930060")
+					|| requestBitfieldsWithValues.get("BITFIELD3").equals("210060")) {
+				if (approveTransaction.equals("PartiallyApprove")) {
+					approveTransaction = "Approve";
+				}
+			}
 		} else if (requestMTI.equals("1220")) {
 			responseMTI = "1230";
 			if (approveTransaction.equals("PartiallyApprove")) {
@@ -193,7 +200,7 @@ public class Responses {
 			bitfield39 = "000";
 			break;
 		case "Decline":
-			bitfield39 = "107";
+			bitfield39 = "100";
 			bitfield44 = "0705";
 			break;
 		case "PartiallyApprove":
@@ -220,14 +227,14 @@ public class Responses {
 		}
 		responseBitfieldswithValue.put("BITFIELD11", requestBitfieldsWithValues.get("BITFIELD11"));
 		responseBitfieldswithValue.put("BITFIELD12", requestBitfieldsWithValues.get("BITFIELD12"));
-		if (approveTransaction.equals("Decline")) {
-			responseBitfieldswithValue.put("BITFIELD39", bitfield39);
-			responseBitfieldswithValue.put("BITFIELD44", bitfield44);
-			elementsInTransaction = "2 3 4 11 12 39 41 42 44 49";
-		} else {
+		if (approveTransaction.contentEquals("Approve") || approveTransaction.contentEquals("PartiallyApprove")) {
 			responseBitfieldswithValue.put("BITFIELD38", bitfield38);
-			responseBitfieldswithValue.put("BITFIELD39", bitfield39);
-			elementsInTransaction = "2 3 4 11 12 38 39 41 42 49";
+			elementsInTransaction.add(38);
+		}
+		responseBitfieldswithValue.put("BITFIELD39", bitfield39);
+		if (approveTransaction.equals("Decline")) {
+			responseBitfieldswithValue.put("BITFIELD44", bitfield44);
+			elementsInTransaction.add(44);
 		}
 		responseBitfieldswithValue.put("BITFIELD41", requestBitfieldsWithValues.get("BITFIELD41"));
 		responseBitfieldswithValue.put("BITFIELD42", requestBitfieldsWithValues.get("BITFIELD42"));
@@ -235,12 +242,14 @@ public class Responses {
 		// For SVS cards, DE 54 should be included. This is identified using
 		// bitfield 3.
 		if (requestBitfieldsWithValues.get("BITFIELD3").equals("900060")
-				|| requestBitfieldsWithValues.get("BITFIELD3").equals("930060")) {
+				|| requestBitfieldsWithValues.get("BITFIELD3").equals("930060")
+				|| requestBitfieldsWithValues.get("BITFIELD3").equals("210060")) {
 			responseBitfieldswithValue.put("BITFIELD54", bitfield54);
+			elementsInTransaction.add(54);
 		}
 
 		HexEncoder encoder = new HexEncoder(responseMTI, eHeader);
-		bitmap = encoder.generateBinaryData(elementsInTransaction);
+		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
 		encoder.setBitmap(bitmap);
 		encoder.setResponseBitFieldsWithValue(responseBitfieldswithValue);
 		encoder.encodeddata();
@@ -254,20 +263,36 @@ public class Responses {
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String reversalMessageResponse() {
-		String responsePacket = "", bitmap, MTI = "1430", actionCode = "400";
+		// approveTransaction can have values Approve,Decline
+		String approveTransaction = "Decline";
+		String responsePacket = "", bitmap, responseMTI = "1430", bitfield38 = "", bitfield39 = "", bitfield44 = "";
+		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(2, 3, 4, 11, 12, 39, 41, 42, 49));
+		if(approveTransaction.equals("Approve")) {
+			bitfield38 = "123456";
+			bitfield39 = "400";
+		}else {
+			bitfield39 = "100";
+			bitfield44 = "0705";
+		}
 		responseBitfieldswithValue.put("BITFIELD2", generateBitfield2(requestBitfieldsWithValues));
 		responseBitfieldswithValue.put("BITFIELD3", requestBitfieldsWithValues.get("BITFIELD3"));
 		responseBitfieldswithValue.put("BITFIELD4", requestBitfieldsWithValues.get("BITFIELD4"));
 		responseBitfieldswithValue.put("BITFIELD11", requestBitfieldsWithValues.get("BITFIELD11"));
 		responseBitfieldswithValue.put("BITFIELD12", requestBitfieldsWithValues.get("BITFIELD12"));
-		responseBitfieldswithValue.put("BITFIELD38", "123456");
-		responseBitfieldswithValue.put("BITFIELD39", actionCode);
+		if(approveTransaction.equals("Approve")) {
+			responseBitfieldswithValue.put("BITFIELD38", bitfield38);
+			elementsInTransaction.add(38);
+		}		
+		responseBitfieldswithValue.put("BITFIELD39", bitfield39);
 		responseBitfieldswithValue.put("BITFIELD41", requestBitfieldsWithValues.get("BITFIELD41"));
 		responseBitfieldswithValue.put("BITFIELD42", requestBitfieldsWithValues.get("BITFIELD42"));
+		if(approveTransaction.equals("Decline")) {
+			responseBitfieldswithValue.put("BITFIELD44", bitfield44);
+			elementsInTransaction.add(44);
+		}
 		responseBitfieldswithValue.put("BITFIELD49", requestBitfieldsWithValues.get("BITFIELD49"));
-		HexEncoder encoder = new HexEncoder(MTI, eHeader);
-		String elementsInTransaction = "2 3 4 11 12 38 39 41 42 49";
-		bitmap = encoder.generateBinaryData(elementsInTransaction);
+		HexEncoder encoder = new HexEncoder(responseMTI, eHeader);		
+		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
 		encoder.setBitmap(bitmap);
 		encoder.setResponseBitFieldsWithValue(responseBitfieldswithValue);
 		encoder.encodeddata();
@@ -302,9 +327,9 @@ public class Responses {
 
 	// ------------------------------------------------------------------------------------------------------------------
 	/*
-	 * This method is used to generate the response bitfield value. When we
-	 * receive the request packet, bitfields will have the length prefixed. This
-	 * has to be removed for the HexEncoder to generate the correct value.
+	 * This method is used to generate the response bitfield value. When we receive
+	 * the request packet, bitfields will have the length prefixed. This has to be
+	 * removed for the HexEncoder to generate the correct value.
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String removeLLVAR(String bitfield, String bitfieldValue) {

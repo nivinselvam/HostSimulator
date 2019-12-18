@@ -1,6 +1,7 @@
 package com.HostSimulator;
 
 import java.util.Map;
+import java.util.TreeSet;
 
 import com.HostSimulator.BitFieldData;
 
@@ -69,7 +70,7 @@ public class HexEncoder {
 			Converter converter = new Converter();
 			MTItoHex = converter.asciitoHex(MTI);
 			eHeaderToHex = converter.asciitoHex(eHeader);
-			// elementsInTransaction = pickElementsInTransaction();
+			//elementsInTransaction = pickElementsInTransaction();
 			// bitmap = generateBinaryData(elementsInTransaction);
 			bitmapToHex = converter.binaryToHex(bitmap);
 			bitfieldValues = generateBitFieldValues();
@@ -155,7 +156,48 @@ public class HexEncoder {
 		}
 		return binaryData.toString();
 	}
+	
+	
+	public static String tgenerateBinaryData(TreeSet<Integer> elementsInTransaction) {
+		StringBuilder binaryData = new StringBuilder();
+		int highestBitfield = elementsInTransaction.last();
+		int bitmapLength;
+		if (highestBitfield < 65) {
+			bitmapLength = 64;
+			binaryData.append("0");
+		} else {
+			bitmapLength = 128;
+			binaryData.append("1");
+		}
+		int i = 2;
+		for (Integer currentElement : elementsInTransaction) {
+			boolean matchFound = false;
+			do {
+				if (i == currentElement) {
+					binaryData.append("1");
+					i++;
+					// if the final element is reached, loop will break and the
+					// remaining bits will not be set.
+					// To avoid this we will not break the loop when it is last
+					// element.
+					if (i <= highestBitfield) {
+						matchFound = true;
+					}
+				} else {
+					binaryData.append("0");
+					i++;
+				}
+				if ((i - 1) % 8 == 0) {
+					binaryData.append(" ");
+				}
+				if (matchFound) {
+					break;
+				}
 
+			} while (i <= bitmapLength);
+		}
+		return binaryData.toString();
+	}
 	// --------------------------------------------------------------------------------------------------------------------
 	/*
 	 * This function finds the overall length of the hexData and generates the
