@@ -60,27 +60,13 @@ public class HexDecoder {
 		Boolean isSecondaryBitmapAvailable = false;
 		String hexDataLengthValue, primaryBitmapValue, secondaryBitmapValue;
 
-		// Grep the data length from hexData
-		// hexDataLengthValue = hexData.substring(0, 5);
-		// String dataLengthInDecimal =
-		// converter.hexToDecimal(hexDataLengthValue);
-		// dataLengthInDecimal = dataLengthInDecimal.replaceAll("\\s", "");
-		// dataLength = Integer.parseInt(dataLengthInDecimal);
-
-		// Grep the eHeader from hexData
-		// eHeader = converter.hexToASCII(hexData.substring(6, 95));
 		eHeader = converter.hexToASCII(hexData.substring(0, 89));
 
-		// Echo requests would have only the eheader. Hence the condition to
-		// check data length
-		// if (dataLength > 95) {
 		if (hexData.length() > 89) {
 			// Grep the MTI from hexData
-			// MTI = converter.hexToASCII(hexData.substring(96, 107));
 			MTI = converter.hexToASCII(hexData.substring(90, 101));
 
 			// Grep the primary bitmap from hexData
-			// primaryBitmapValue = hexData.substring(108, 131);
 			primaryBitmapValue = hexData.substring(102, 125);
 			primaryBitMap = converter.hexToBinary(primaryBitmapValue);
 			// currentPosition = 88;
@@ -91,10 +77,8 @@ public class HexDecoder {
 
 			// Grep the secondary bitmap from hex Data if available
 			if (isSecondaryBitmapAvailable) {
-				// secondaryBitmapValue = hexData.substring(132, 155);
 				secondaryBitmapValue = hexData.substring(126, 149);
 				secondaryBitmap = converter.hexToBinary(secondaryBitmapValue);
-				// currentPosition = 104;
 				currentPosition = 100;
 			}
 
@@ -108,7 +92,6 @@ public class HexDecoder {
 			// identify the bitfields involved in the transaction
 			bitFieldwithValues = bitfieldAndValueMapping(consolidatedBitmap, hexData);
 		}
-		// printEncodedData(hexData.length());
 	}
 
 	// --------------------------------------------------------------------------------------------------

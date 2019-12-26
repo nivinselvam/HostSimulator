@@ -36,7 +36,6 @@ public class Server {
 				// TODO Auto-generated method stubroot
 				return null;
 			}
-
 		}
 
 		};
@@ -63,10 +62,6 @@ public class Server {
 	ServerSocket ss;
 	ArrayList<ServerConnection> connections = new ArrayList<ServerConnection>();
 	boolean shouldRun = true;
-
-	public static void main(String[] args) {
-		new Server();
-	}
 
 	public Server() {
 		try {
