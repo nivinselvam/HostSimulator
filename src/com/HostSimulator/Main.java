@@ -4,7 +4,7 @@ import java.awt.EventQueue;
 import javax.swing.UIManager;
 
 public class Main{
-	
+	public static String fepName = "HPS";
 	public static void main(String[] args) {
 //		try {
 //			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -23,8 +23,6 @@ public class Main{
 //		});
 		
 		Server server = new Server();	
-		
-		String fepname = "hps";
 		
 	}
 	

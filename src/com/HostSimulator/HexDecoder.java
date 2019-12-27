@@ -60,26 +60,25 @@ public class HexDecoder {
 		Boolean isSecondaryBitmapAvailable = false;
 		String hexDataLengthValue, primaryBitmapValue, secondaryBitmapValue;
 
-		eHeader = converter.hexToASCII(hexData.substring(0, 89));
+		eHeader = converter.hexToASCII(hexData.substring(Constants.eHeaderStartPoint, Constants.eHeaderEndPoint));
 
 		if (hexData.length() > 89) {
 			// Grep the MTI from hexData
-			MTI = converter.hexToASCII(hexData.substring(90, 101));
+			MTI = converter.hexToASCII(hexData.substring(Constants.mtiStartPoint, Constants.mtiEndPoint));
 
 			// Grep the primary bitmap from hexData
-			primaryBitmapValue = hexData.substring(102, 125);
+			primaryBitmapValue = hexData.substring(Constants.primaryBitmapStartPoint, Constants.primaryBitmapEndPoint);
 			primaryBitMap = converter.hexToBinary(primaryBitmapValue);
-			// currentPosition = 88;
-			currentPosition = 84;
+			currentPosition = Constants.primaryBitmapPosition;
 			if (primaryBitMap.charAt(0) == '1') {
 				isSecondaryBitmapAvailable = true;
 			}
 
 			// Grep the secondary bitmap from hex Data if available
 			if (isSecondaryBitmapAvailable) {
-				secondaryBitmapValue = hexData.substring(126, 149);
+				secondaryBitmapValue = hexData.substring(Constants.secondaryBitmapStartPoint, Constants.secondaryBitmapEndPoint);
 				secondaryBitmap = converter.hexToBinary(secondaryBitmapValue);
-				currentPosition = 100;
+				currentPosition = Constants.secondaryBitmapEndPosition;
 			}
 
 			// Bitmap consolidation
