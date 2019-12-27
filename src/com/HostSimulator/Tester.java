@@ -25,18 +25,18 @@ public class Tester {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		System.out.println(generateIntegerArrayFromString(p.getProperty("elementsInGenericTransaction")));	
+		System.out.println(generateArrayListFromString(p.getProperty("balanceInquiryCodes")));
 		
 	}	
-	public static Integer[] generateIntegerArrayFromString(String elementsInTransaction) {
-		elementsInTransaction = elementsInTransaction.replaceAll("\\s", "");
-		Integer[] elementsInTransactionArrayIntegers = new Integer[elementsInTransaction.split(",").length];
-		int i = 0;
+	
+	public static ArrayList<String> generateArrayListFromString(String elementsInTransaction){
+		elementsInTransaction = elementsInTransaction.replace(" ", "");
+		ArrayList<String> elementsInTransactionList = new ArrayList<String>();
 		for(String currentString: elementsInTransaction.split(",")) {
-			elementsInTransactionArrayIntegers[i] = Integer.parseInt(currentString);
-			i++;
-		}		
-		return elementsInTransactionArrayIntegers;
+			elementsInTransactionList.add(currentString);
+		}
+		return elementsInTransactionList;
 	}
+
+
 }

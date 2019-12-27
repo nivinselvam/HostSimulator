@@ -62,7 +62,7 @@ public class HexDecoder {
 
 		eHeader = converter.hexToASCII(hexData.substring(Constants.eHeaderStartPoint, Constants.eHeaderEndPoint));
 
-		if (hexData.length() > 89) {
+		if (hexData.length() > Constants.eHeaderEndPoint) {
 			// Grep the MTI from hexData
 			MTI = converter.hexToASCII(hexData.substring(Constants.mtiStartPoint, Constants.mtiEndPoint));
 

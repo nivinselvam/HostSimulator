@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,8 +13,10 @@ public final class Constants {
 
 	static {
 		String fepFile = null;
-		if (Main.fepName.equals("HPS")) {
-			fepFile = "HPSConstants.properties";
+		
+		switch(Main.fepName) {
+		case "HPS": fepFile = "HPSConstants.properties";
+		break;
 		}
 
 		File file = new File(fepFile);
@@ -37,32 +38,29 @@ public final class Constants {
 
 	}
 
-	// Transaction Status(Takes values Approve,PartiallyApprove,Decline):
-	public static final String authorizationTransactionResponse = "Approve";
-	public static final String financialSalesTransactionResponse = "Approve";
-	public static final String financialForceDraftTransactionResponse = "Approve";
-	public static final String reversalTransactionResponse = "Approve";
-	public static final String reconsillationTransactionResponse = "Approve";
+	// Transaction Status
+	public static final String authorizationTransactionResponse = p.getProperty("authorizationTransactionResponse");
+	public static final String financialSalesTransactionResponse = p.getProperty("financialSalesTransactionResponse");
+	public static final String financialForceDraftTransactionResponse = p.getProperty("financialForceDraftTransactionResponse");
+	public static final String reversalTransactionResponse = p.getProperty("reversalTransactionResponse");
+	public static final String reconsillationTransactionResponse = p.getProperty("reconsillationTransactionResponse");
 	// Transaction MTI:
-	public static final String authorisationRequestMTI = "1100";
-	public static final String authorisationResponseMTI = "1110";
-	public static final String financialSalesRequestMTI = "1200";
-	public static final String financialSalesResponseMTI = "1210";
-	public static final String financialForceDraftRequestMTI = "1220";
-	public static final String financialForceDraftResponseMTI = "1230";
-	public static final String reversalRequestMTI = "1420";
-	public static final String reversalResponseMTI = "1430";
-	public static final String reconsillationRequestMTI = "1520";
-	public static final String reconsillationResponseMTI = "1530";
+	public static final String authorisationRequestMTI = p.getProperty("authorisationRequestMTI");
+	public static final String authorisationResponseMTI = p.getProperty("authorisationResponseMTI");
+	public static final String financialSalesRequestMTI = p.getProperty("financialSalesRequestMTI");
+	public static final String financialSalesResponseMTI = p.getProperty("financialSalesResponseMTI");
+	public static final String financialForceDraftRequestMTI = p.getProperty("financialForceDraftRequestMTI");
+	public static final String financialForceDraftResponseMTI = p.getProperty("financialForceDraftResponseMTI");
+	public static final String reversalRequestMTI = p.getProperty("reversalRequestMTI");
+	public static final String reversalResponseMTI = p.getProperty("reversalResponseMTI");
+	public static final String reconsillationRequestMTI = p.getProperty("reconsillationRequestMTI");
+	public static final String reconsillationResponseMTI = p.getProperty("reconsillationResponseMTI");
 	// BitFields involved in Transaction
-	public static final Integer[] elementsInGenericTransaction = { 2, 3, 4, 11, 12, 39, 41, 42, 49 };
-	//public static final Integer[] elementsInGenericTransaction = generateIntegerArrayFromString(p.getProperty("elementsInGenericTransaction"));
-	public static final Integer[] elementsInReconsillationTransaction = { 11, 12, 39, 41, 42, 48, 123 };
+	public static final Integer[] elementsInGenericTransaction = generateIntegerArrayFromString(p.getProperty("elementsInGenericTransaction"));
+	public static final Integer[] elementsInReconsillationTransaction = generateIntegerArrayFromString(p.getProperty("elementsInReconsillationTransaction"));
 	// Codes to be validated during transaction
-	public static final List<String> balanceInquiryCodes = new ArrayList<String>(
-			Arrays.asList("313000", "318000", "318100", "309700", "319700", "316000", "313900"));
-	public static final List<String> activationRechargeCodes = new ArrayList<String>(
-			Arrays.asList("900060", "930060", "210060"));
+	public static final List<String> balanceInquiryCodes = generateArrayListFromString(p.getProperty("balanceInquiryCodes"));
+	public static final List<String> activationRechargeCodes = generateArrayListFromString(p.getProperty("activationRechargeCodes"));
 	// BitField Names:
 	public static final String nameOfbitfield2 = "BITFIELD2";
 	public static final String nameOfbitfield3 = "BITFIELD3";
@@ -81,30 +79,31 @@ public final class Constants {
 	public static final String nameOfbitfield54 = "BITFIELD54";
 	public static final String nameOfbitfield123 = "BITFIELD123";
 	// BitField Values:
-	public static final String valueOfBitfield4 = "000000010000";
-	public static final String valueOfBitfield38 = "123456";
-	public static final String ValueOfBitfield39Approval = "000";
-	public static final String ValueOfBitfield39Decline = "100";
-	public static final String ValueOfBitfield39Partial = "002";
-	public static final String valueOfBitfield44 = "0705";
-	public static final String valueOfBitfield48 = "       0000000099";
-	public static final String valueOfBitfield54 = "6501840C000000010000";
-	public static final String valueOfBitfield123 = "0010002   CT  0000000000\\\\000000000000\\\\002   DB  0000000000\\\\000000000000\\\\002   MC  0000000000\\\\000000000000\\\\002   OH  0000000000\\\\000000000000\\\\002   PL  0000000000\\\\000000000000\\\\002   VI  0000000000\\\\000000000000\\\\007   CT  0000000000\\\\000000000000\\\\007   DB  0000000000\\\\000000000000\\\\299   CT  0000000000\\\\000000000000\\\\299   DB  0000000000\\\\000000000000\\\\";
+	public static final String valueOfBitfield4 = p.getProperty("valueOfBitfield4");
+	public static final String valueOfBitfield38 = p.getProperty("valueOfBitfield38");
+	public static final String ValueOfBitfield39Approval = p.getProperty("ValueOfBitfield39Approval");
+	public static final String ValueOfBitfield39Decline = p.getProperty("ValueOfBitfield39Decline");
+	public static final String ValueOfBitfield39Partial = p.getProperty("ValueOfBitfield39Partial");
+	public static final String ValueOfBitfield39Reversal = p.getProperty("ValueOfBitfield39Reversal");
+	public static final String valueOfBitfield44 = p.getProperty("valueOfBitfield44");
+	public static final String valueOfBitfield48 = p.getProperty("valueOfBitfield48");
+	public static final String valueOfBitfield54 = p.getProperty("valueOfBitfield54");
+	public static final String valueOfBitfield123 = p.getProperty("valueOfBitfield123");
 	// Decoding details:
-	public static final Integer eHeaderStartPoint = 0;
-	public static final Integer eHeaderEndPoint = 89;
-	public static final Integer mtiStartPoint = 90;
-	public static final Integer mtiEndPoint = 101;
-	public static final Integer primaryBitmapStartPoint = 102;
-	public static final Integer primaryBitmapEndPoint = 125;
-	public static final Integer primaryBitmapPosition = 84;
-	public static final Integer secondaryBitmapStartPoint = 126;
-	public static final Integer secondaryBitmapEndPoint = 149;
-	public static final Integer secondaryBitmapEndPosition = 100;
+	public static final Integer eHeaderStartPoint = Integer.parseInt(p.getProperty("eHeaderStartPoint"));
+	public static final Integer eHeaderEndPoint = Integer.parseInt(p.getProperty("eHeaderEndPoint"));
+	public static final Integer mtiStartPoint = Integer.parseInt(p.getProperty("mtiStartPoint"));
+	public static final Integer mtiEndPoint = Integer.parseInt(p.getProperty("mtiEndPoint"));
+	public static final Integer primaryBitmapStartPoint = Integer.parseInt(p.getProperty("primaryBitmapStartPoint"));
+	public static final Integer primaryBitmapEndPoint = Integer.parseInt(p.getProperty("primaryBitmapEndPoint"));
+	public static final Integer primaryBitmapPosition = Integer.parseInt(p.getProperty("primaryBitmapPosition"));
+	public static final Integer secondaryBitmapStartPoint = Integer.parseInt(p.getProperty("secondaryBitmapStartPoint"));
+	public static final Integer secondaryBitmapEndPoint = Integer.parseInt(p.getProperty("secondaryBitmapEndPoint"));
+	public static final Integer secondaryBitmapEndPosition = Integer.parseInt(p.getProperty("secondaryBitmapEndPosition"));
 	
 	
 	public static Integer[] generateIntegerArrayFromString(String elementsInTransaction) {
-		elementsInTransaction = elementsInTransaction.replaceAll("\\s", "");
+		elementsInTransaction = elementsInTransaction.replaceAll(" ", "");
 		Integer[] elementsInTransactionArrayIntegers = new Integer[elementsInTransaction.split(",").length];
 		int i = 0;
 		for(String currentString: elementsInTransaction.split(",")) {
@@ -112,6 +111,15 @@ public final class Constants {
 			i++;
 		}		
 		return elementsInTransactionArrayIntegers;
+	}
+	
+	public static ArrayList<String> generateArrayListFromString(String elementsInTransaction){
+		elementsInTransaction = elementsInTransaction.replace(" ", "");
+		ArrayList<String> elementsInTransactionList = new ArrayList<String>();
+		for(String currentString: elementsInTransaction.split(",")) {
+			elementsInTransactionList.add(currentString);
+		}
+		return elementsInTransactionList;
 	}
 
 }

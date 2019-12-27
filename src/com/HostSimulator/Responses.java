@@ -60,17 +60,17 @@ public class Responses {
 		decoder.printEncodedData();
 		responseBitfieldswithValue = new TreeMap<>(new BitfieldComparator());
 		switch (requestMTI) {
-		case Constants.authorisationRequestMTI:
+		case "1100":
 			responsePacket = authorizationMessageResponse();
 			break;
-		case Constants.financialSalesRequestMTI:
-		case Constants.financialForceDraftRequestMTI:
+		case "1200":
+		case "1220":
 			responsePacket = financialMessageResponse();
 			break;
-		case Constants.reversalRequestMTI:
+		case "1420":
 			responsePacket = reversalMessageResponse();
 			break;
-		case Constants.reconsillationRequestMTI:
+		case "1520":
 			responsePacket = reconciliationMessageResponse();
 			break;
 		}
@@ -213,35 +213,24 @@ public class Responses {
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String reversalMessageResponse() {
-		// approveTransaction can have values Approve,Decline
-		String approveTransaction = "Approve";
-		String responsePacket = "", bitmap, responseMTI = "1430", bitfield38 = "", bitfield39 = "", bitfield44 = "";
-		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(2, 3, 4, 11, 12, 39, 41, 42, 49));
-		if (approveTransaction.equals("Approve")) {
-			bitfield38 = "123456";
-			bitfield39 = "400";
-		} else {
-			bitfield39 = "100";
-			bitfield44 = "0705";
-		}
-		responseBitfieldswithValue.put("BITFIELD2", generateBitfield2(requestBitfieldsWithValues));
-		responseBitfieldswithValue.put("BITFIELD3", requestBitfieldsWithValues.get("BITFIELD3"));
-		responseBitfieldswithValue.put("BITFIELD4", requestBitfieldsWithValues.get("BITFIELD4"));
-		responseBitfieldswithValue.put("BITFIELD11", requestBitfieldsWithValues.get("BITFIELD11"));
-		responseBitfieldswithValue.put("BITFIELD12", requestBitfieldsWithValues.get("BITFIELD12"));
-		if (approveTransaction.equals("Approve")) {
-			responseBitfieldswithValue.put("BITFIELD38", bitfield38);
+		String approveTransaction = Constants.reversalTransactionResponse;
+		String responsePacket = "", bitmap, bitfield39 = "";
+		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInGenericTransaction));
+		generateResponseBitfieldswithValue(elementsInTransaction);
+		
+		//Bitfields for which the values should be generated.
+		responseBitfieldswithValue.put(Constants.nameOfbitfield2, generateBitfield2(requestBitfieldsWithValues));
+		if (approveTransaction.equals("Approve")) {			
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reversal);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield38, Constants.valueOfBitfield38);
 			elementsInTransaction.add(38);
-		}
-		responseBitfieldswithValue.put("BITFIELD39", bitfield39);
-		responseBitfieldswithValue.put("BITFIELD41", requestBitfieldsWithValues.get("BITFIELD41"));
-		responseBitfieldswithValue.put("BITFIELD42", requestBitfieldsWithValues.get("BITFIELD42"));
-		if (approveTransaction.equals("Decline")) {
-			responseBitfieldswithValue.put("BITFIELD44", bitfield44);
+		} else {
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield44, Constants.valueOfBitfield44);
 			elementsInTransaction.add(44);
 		}
-		responseBitfieldswithValue.put("BITFIELD49", requestBitfieldsWithValues.get("BITFIELD49"));
-		HexEncoder encoder = new HexEncoder(responseMTI, eHeader);
+
+		HexEncoder encoder = new HexEncoder(Constants.reversalResponseMTI, eHeader);
 		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
 		encoder.setBitmap(bitmap);
 		encoder.setResponseBitFieldsWithValue(responseBitfieldswithValue);
