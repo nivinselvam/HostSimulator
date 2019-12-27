@@ -10,14 +10,10 @@ import java.util.List;
 import java.util.Properties;
 
 public final class Constants {
-	public static String fepFile;
 	public static Properties p = new Properties();
 
-	private Constants() {
-		
-	}
-
-	public static void loadConstants() {
+	static {
+		String fepFile = null;
 		if (Main.fepName.equals("HPS")) {
 			fepFile = "HPSConstants.properties";
 		}
@@ -37,9 +33,13 @@ public final class Constants {
 		}
 	}
 
+	private Constants() {
+
+	}
+
 	// Transaction Status(Takes values Approve,PartiallyApprove,Decline):
 	public static final String authorizationTransactionResponse = "Approve";
-	public static final String financialSalesTransactionResponse = "Decline";
+	public static final String financialSalesTransactionResponse = "Approve";
 	public static final String financialForceDraftTransactionResponse = "Approve";
 	public static final String reversalTransactionResponse = "Approve";
 	public static final String reconsillationTransactionResponse = "Approve";
@@ -56,10 +56,11 @@ public final class Constants {
 	public static final String reconsillationResponseMTI = "1530";
 	// BitFields involved in Transaction
 	public static final Integer[] elementsInGenericTransaction = { 2, 3, 4, 11, 12, 39, 41, 42, 49 };
+	//public static final Integer[] elementsInGenericTransaction = generateIntegerArrayFromString(p.getProperty("elementsInGenericTransaction"));
 	public static final Integer[] elementsInReconsillationTransaction = { 11, 12, 39, 41, 42, 48, 123 };
 	// Codes to be validated during transaction
-	public static final String[] balanceInquiryCodes = { "313000", "318000", "318100", "309700", "319700", "316000",
-			"313900" };
+	public static final List<String> balanceInquiryCodes = new ArrayList<String>(
+			Arrays.asList("313000", "318000", "318100", "309700", "319700", "316000", "313900"));
 	public static final List<String> activationRechargeCodes = new ArrayList<String>(
 			Arrays.asList("900060", "930060", "210060"));
 	// BitField Names:
@@ -82,11 +83,14 @@ public final class Constants {
 	// BitField Values:
 	public static final String valueOfBitfield4 = "000000010000";
 	public static final String valueOfBitfield38 = "123456";
+	public static final String ValueOfBitfield39Approval = "000";
+	public static final String ValueOfBitfield39Decline = "100";
+	public static final String ValueOfBitfield39Partial = "002";
 	public static final String valueOfBitfield44 = "0705";
 	public static final String valueOfBitfield48 = "       0000000099";
 	public static final String valueOfBitfield54 = "6501840C000000010000";
 	public static final String valueOfBitfield123 = "0010002   CT  0000000000\\\\000000000000\\\\002   DB  0000000000\\\\000000000000\\\\002   MC  0000000000\\\\000000000000\\\\002   OH  0000000000\\\\000000000000\\\\002   PL  0000000000\\\\000000000000\\\\002   VI  0000000000\\\\000000000000\\\\007   CT  0000000000\\\\000000000000\\\\007   DB  0000000000\\\\000000000000\\\\299   CT  0000000000\\\\000000000000\\\\299   DB  0000000000\\\\000000000000\\\\";
-	//Decoding details:
+	// Decoding details:
 	public static final Integer eHeaderStartPoint = 0;
 	public static final Integer eHeaderEndPoint = 89;
 	public static final Integer mtiStartPoint = 90;
@@ -96,6 +100,18 @@ public final class Constants {
 	public static final Integer primaryBitmapPosition = 84;
 	public static final Integer secondaryBitmapStartPoint = 126;
 	public static final Integer secondaryBitmapEndPoint = 149;
-	public static final Integer secondaryBitmapEndPosition = 100;	
+	public static final Integer secondaryBitmapEndPosition = 100;
 	
+	
+	public static Integer[] generateIntegerArrayFromString(String elementsInTransaction) {
+		elementsInTransaction = elementsInTransaction.replaceAll("\\s", "");
+		Integer[] elementsInTransactionArrayIntegers = new Integer[elementsInTransaction.split(",").length];
+		int i = 0;
+		for(String currentString: elementsInTransaction.split(",")) {
+			elementsInTransactionArrayIntegers[i] = Integer.parseInt(currentString);
+			i++;
+		}		
+		return elementsInTransactionArrayIntegers;
+	}
+
 }
