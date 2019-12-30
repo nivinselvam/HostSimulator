@@ -41,25 +41,6 @@ public class Converter {
 	 * is converted into hex array to work on on byte at a time
 	 */
 	// ------------------------------------------------------------------------------------------------------------
-	// public String hexToDecimal(String hex) {
-	// String decimalValue = "";
-	// tempArray = hex.split(" ");
-	// for (String currentByte : tempArray) {
-	// String digits = "0123456789ABCDEF";
-	// currentByte = currentByte.toUpperCase();
-	// int val = 0;
-	// for (int j = 0; j < currentByte.length(); j++) {
-	// char c = currentByte.charAt(j);
-	// int d = digits.indexOf(c);
-	// val = 16 * val + d;
-	// }
-	// decimalValue = decimalValue + Integer.toString(val) + " ";
-	//
-	// }
-	// tempArray = null;
-	// return decimalValue;
-	// }
-
 	public String hexToDecimal(String hex) {
 		String decimalValue = "";
 		hex = hex.replaceAll("\\s", "");

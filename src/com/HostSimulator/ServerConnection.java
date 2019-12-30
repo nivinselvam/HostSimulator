@@ -59,10 +59,18 @@ public class ServerConnection extends Thread {
 					}
 
 				}
-
-				int msgSize = din.readShort();
-				byte[] message = new byte[msgSize - 2];
-				din.read(message, 0, msgSize - 2);
+				
+				//HPS Sends the Data length in the first 2 bytes but other FEPs don't send.
+				int msgSize = 0;
+				if(Main.fepName.equals("HPS")) {
+					msgSize = din.readShort()-2;
+				}else {
+					msgSize = din.available();
+				}
+				
+				byte[] message = new byte[msgSize];
+				din.read(message, 0, msgSize);
+				
 
 				StringBuffer requestPacket = new StringBuffer();
 				for (byte currByte : message) {

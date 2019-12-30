@@ -245,18 +245,20 @@ public class Responses {
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String reconciliationMessageResponse() {
-		String responsePacket = "", bitmap;
-		responseBitfieldswithValue.put("BITFIELD11", requestBitfieldsWithValues.get("BITFIELD11"));
-		responseBitfieldswithValue.put("BITFIELD12", requestBitfieldsWithValues.get("BITFIELD12"));
-		responseBitfieldswithValue.put("BITFIELD39", "940");
-		responseBitfieldswithValue.put("BITFIELD41", requestBitfieldsWithValues.get("BITFIELD41"));
-		responseBitfieldswithValue.put("BITFIELD42", requestBitfieldsWithValues.get("BITFIELD42"));
-		responseBitfieldswithValue.put("BITFIELD48", "       0000000099");
-		responseBitfieldswithValue.put("BITFIELD123",
-				"0010002   CT  0000000000\\000000000000\\002   DB  0000000000\\000000000000\\002   MC  0000000000\\000000000000\\002   OH  0000000000\\000000000000\\002   PL  0000000000\\000000000000\\002   VI  0000000000\\000000000000\\007   CT  0000000000\\000000000000\\007   DB  0000000000\\000000000000\\299   CT  0000000000\\000000000000\\299   DB  0000000000\\000000000000\\");
-		HexEncoder encoder = new HexEncoder("1530", eHeader);
-		String elementsInTransaction = "11 12 39 41 42 48 123";
-		bitmap = encoder.generateBinaryData(elementsInTransaction);
+		String responsePacket = "", bitmap , approveTransaction = Constants.reversalTransactionResponse;
+		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInReconsillationTransaction));
+		generateResponseBitfieldswithValue(elementsInTransaction);
+		//Bitfields for which the values should be generated.
+		if(approveTransaction.equals("")) {
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reconsillation);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield123,Constants.valueOfBitfield123);
+		}else {
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline);
+		}
+		responseBitfieldswithValue.put(Constants.nameOfbitfield48, Constants.valueOfBitfield48);
+		
+		HexEncoder encoder = new HexEncoder(Constants.reconsillationResponseMTI, eHeader);
+		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
 		encoder.setBitmap(bitmap);
 		encoder.setResponseBitFieldsWithValue(responseBitfieldswithValue);
 		encoder.encodeddata();
@@ -273,7 +275,7 @@ public class Responses {
 	// ------------------------------------------------------------------------------------------------------------------
 	public String removeLLVAR(String bitfield, String bitfieldValue) {
 		StringBuffer updatedValue = new StringBuffer(bitfieldValue);
-		BitFieldData bitfieldLength = new BitFieldData(true);
+		BitFieldData bitfieldLength = new BitFieldData();
 		if (bitfieldLength.bitfieldLength.get(bitfield) == -2) {
 			updatedValue.delete(0, 2);
 		} else if (bitfieldLength.bitfieldLength.get(bitfield) == -3) {

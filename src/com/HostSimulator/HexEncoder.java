@@ -69,7 +69,9 @@ public class HexEncoder {
 		try {
 			Converter converter = new Converter();
 			MTItoHex = converter.asciitoHex(MTI);
+			
 			eHeaderToHex = converter.asciitoHex(eHeader);
+		
 			//elementsInTransaction = pickElementsInTransaction();
 			// bitmap = generateBinaryData(elementsInTransaction);
 			bitmapToHex = converter.binaryToHex(bitmap);
@@ -94,19 +96,19 @@ public class HexEncoder {
 	 * involved in the transaction
 	 */
 	// ---------------------------------------------------------------------------------------------------
-	public String pickElementsInTransaction() {
-		BitFieldData bitFieldData = new BitFieldData(false);
-		String elementsInTransaction = "", bitFieldValuesInTransaction = "";
-		for (Map.Entry<String, String> currentEntry : bitFieldData.bitfieldValue.entrySet()) {
-			if (currentEntry.getValue().equals("") == false) {
-				elementsInTransaction = elementsInTransaction + currentEntry.getKey().replace("BITFIELD", "") + " ";
-				// bitFieldValuesInTransaction = bitFieldValuesInTransaction +
-				// currentEntry.getValue()+" ";
-			}
-		}
-		return elementsInTransaction;
-
-	}
+//	public String pickElementsInTransaction() {
+//		BitFieldData bitFieldData = new BitFieldData(false);
+//		String elementsInTransaction = "", bitFieldValuesInTransaction = "";
+//		for (Map.Entry<String, String> currentEntry : bitFieldData.bitfieldValue.entrySet()) {
+//			if (currentEntry.getValue().equals("") == false) {
+//				elementsInTransaction = elementsInTransaction + currentEntry.getKey().replace("BITFIELD", "") + " ";
+//				// bitFieldValuesInTransaction = bitFieldValuesInTransaction +
+//				// currentEntry.getValue()+" ";
+//			}
+//		}
+//		return elementsInTransaction;
+//
+//	}
 
 	// --------------------------------------------------------------------------------------------------
 	/*
@@ -242,7 +244,7 @@ public class HexEncoder {
 	// ---------------------------------------------------------------------------------------------------------------------
 	public String generateBitFieldValues() {
 		String finalBitfieldValues = "", currentBitfield, currentBitfieldLength;
-		BitFieldData bitFieldLength = new BitFieldData(true);
+		BitFieldData bitFieldLength = new BitFieldData();
 		// BitFieldData bitFieldValues = new BitFieldData(false);
 		// for(Map.Entry<String, String> currentEntry :
 		// bitFieldValues.bitfieldValue.entrySet()){

@@ -59,8 +59,11 @@ public class HexDecoder {
 		hexData = converter.addSpacesToString(hexData);
 		Boolean isSecondaryBitmapAvailable = false;
 		String hexDataLengthValue, primaryBitmapValue, secondaryBitmapValue;
-
-		eHeader = converter.hexToASCII(hexData.substring(Constants.eHeaderStartPoint, Constants.eHeaderEndPoint));
+		try {
+			eHeader = converter.hexToASCII(hexData.substring(Constants.eHeaderStartPoint, Constants.eHeaderEndPoint));
+		}catch(NumberFormatException e) {
+			eHeader = "";
+		}		
 
 		if (hexData.length() > Constants.eHeaderEndPoint) {
 			// Grep the MTI from hexData
@@ -90,6 +93,7 @@ public class HexDecoder {
 
 			// identify the bitfields involved in the transaction
 			bitFieldwithValues = bitfieldAndValueMapping(consolidatedBitmap, hexData);
+			System.out.println();
 		}
 	}
 
@@ -122,7 +126,7 @@ public class HexDecoder {
 		Map<String, String> bitfieldAndValueMap = new LinkedHashMap<String, String>();
 		String tempString = getElementsInTransaction(consolidatedBitmap);
 		String tempHexData = hexData.replaceAll("\\s", "");
-		BitFieldData bitfieldLength = new BitFieldData(true);
+		BitFieldData bitfieldLength = new BitFieldData();
 		String[] elements = tempString.split(" ");
 		for (String element : elements) {
 			String currentBitField = "BITFIELD" + element, currentBitFieldValue;

@@ -85,6 +85,7 @@ public final class Constants {
 	public static final String ValueOfBitfield39Decline = p.getProperty("ValueOfBitfield39Decline");
 	public static final String ValueOfBitfield39Partial = p.getProperty("ValueOfBitfield39Partial");
 	public static final String ValueOfBitfield39Reversal = p.getProperty("ValueOfBitfield39Reversal");
+	public static final String ValueOfBitfield39Reconsillation = p.getProperty("ValueOfBitfield39Reconsillation");
 	public static final String valueOfBitfield44 = p.getProperty("valueOfBitfield44");
 	public static final String valueOfBitfield48 = p.getProperty("valueOfBitfield48");
 	public static final String valueOfBitfield54 = p.getProperty("valueOfBitfield54");
