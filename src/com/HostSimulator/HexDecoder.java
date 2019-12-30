@@ -2,11 +2,13 @@ package com.HostSimulator;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.HostSimulator.BitFieldData;
 
 public class HexDecoder {
-
+	
+	static final Logger log = Logger.getLogger("HexDecoder.class"); 
 	public static Converter converter = new Converter();
 	private int dataLength, currentPosition;
 	private String eHeader, MTI, primaryBitMap, secondaryBitmap, consolidatedBitmap;
@@ -93,7 +95,6 @@ public class HexDecoder {
 
 			// identify the bitfields involved in the transaction
 			bitFieldwithValues = bitfieldAndValueMapping(consolidatedBitmap, hexData);
-			System.out.println();
 		}
 	}
 

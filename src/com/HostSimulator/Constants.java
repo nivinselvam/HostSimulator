@@ -17,6 +17,8 @@ public final class Constants {
 		switch(Main.fepName) {
 		case "HPS": fepFile = "HPSConstants.properties";
 		break;
+		case "INCOMM": fepFile = "IncommConstants.properties";
+		break;
 		}
 
 		File file = new File(fepFile);

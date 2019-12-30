@@ -59,21 +59,32 @@ public class Responses {
 		System.out.println("Request Packet");
 		decoder.printEncodedData();
 		responseBitfieldswithValue = new TreeMap<>(new BitfieldComparator());
-		switch (requestMTI) {
-		case "1100":
+		
+		if(requestMTI.equals(Constants.authorisationRequestMTI)) {
 			responsePacket = authorizationMessageResponse();
-			break;
-		case "1200":
-		case "1220":
+		}else if(requestMTI.equals(Constants.financialSalesRequestMTI)||requestMTI.equals(Constants.financialForceDraftRequestMTI)) {
 			responsePacket = financialMessageResponse();
-			break;
-		case "1420":
+		}else if(requestMTI.equals(Constants.reversalRequestMTI)) {
 			responsePacket = reversalMessageResponse();
-			break;
-		case "1520":
+		}else if(requestMTI.equals(Constants.reconsillationRequestMTI)) {
 			responsePacket = reconciliationMessageResponse();
-			break;
-		}
+		}		
+		
+//		switch (requestMTI) {
+//		case "1100":
+//			responsePacket = authorizationMessageResponse();
+//			break;
+//		case "1200":
+//		case "1220":
+//			responsePacket = financialMessageResponse();
+//			break;
+//		case "1420":
+//			responsePacket = reversalMessageResponse();
+//			break;
+//		case "1520":
+//			responsePacket = reconciliationMessageResponse();
+//			break;
+//		}
 		decoder = new HexDecoder(responsePacket);
 		System.out.println("Response Packet");
 		decoder.printEncodedData();
