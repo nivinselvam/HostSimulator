@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -13,12 +14,17 @@ public final class Constants {
 
 	static {
 		String fepFile = null;
-		
-		switch(Main.fepName) {
-		case "HPS": fepFile = "HPSConstants.properties";
-		break;
-		case "INCOMM": fepFile = "IncommConstants.properties";
-		break;
+
+		switch (Main.fepName) {
+		case "HPS":
+			fepFile = "HPSConstants.properties";
+			break;
+		case "FCB":
+			fepFile = "FCBConstants.properties";
+			break;
+		case "INCOMM":
+			fepFile = "IncommConstants.properties";
+			break;
 		}
 
 		File file = new File(fepFile);
@@ -43,7 +49,8 @@ public final class Constants {
 	// Transaction Status
 	public static final String authorizationTransactionResponse = p.getProperty("authorizationTransactionResponse");
 	public static final String financialSalesTransactionResponse = p.getProperty("financialSalesTransactionResponse");
-	public static final String financialForceDraftTransactionResponse = p.getProperty("financialForceDraftTransactionResponse");
+	public static final String financialForceDraftTransactionResponse = p
+			.getProperty("financialForceDraftTransactionResponse");
 	public static final String reversalTransactionResponse = p.getProperty("reversalTransactionResponse");
 	public static final String reconsillationTransactionResponse = p.getProperty("reconsillationTransactionResponse");
 	// Transaction MTI:
@@ -58,15 +65,28 @@ public final class Constants {
 	public static final String reconsillationRequestMTI = p.getProperty("reconsillationRequestMTI");
 	public static final String reconsillationResponseMTI = p.getProperty("reconsillationResponseMTI");
 	// BitFields involved in Transaction
-	public static final Integer[] elementsInGenericTransaction = generateIntegerArrayFromString(p.getProperty("elementsInGenericTransaction"));
-	public static final Integer[] elementsInReconsillationTransaction = generateIntegerArrayFromString(p.getProperty("elementsInReconsillationTransaction"));
+	public static final Integer[] elementsInAuthorisationTransaction = generateIntegerArrayFromString(
+			p.getProperty("elementsInAuthorisationTransaction"));
+	public static final Integer[] elementsInFinancialTransaction = generateIntegerArrayFromString(
+			p.getProperty("elementsInFinancialTransaction"));
+	public static final Integer[] elementsInReversalTransaction = generateIntegerArrayFromString(
+			p.getProperty("elementsInReversalTransaction"));
+	public static final Integer[] elementsInReconsillationTransaction = generateIntegerArrayFromString(
+			p.getProperty("elementsInReconsillationTransaction"));
+	
 	// Codes to be validated during transaction
-	public static final List<String> balanceInquiryCodes = generateArrayListFromString(p.getProperty("balanceInquiryCodes"));
-	public static final List<String> activationRechargeCodes = generateArrayListFromString(p.getProperty("activationRechargeCodes"));
+	public static final List<String> balanceInquiryCodes = generateArrayListFromString(
+			p.getProperty("balanceInquiryCodes"));
+	public static final List<String> activationRechargeCodes = generateArrayListFromString(
+			p.getProperty("activationRechargeCodes"));
+	//Below constant is FCB fep specific
+	public static final List<Integer> elementsInHexFormatforFCBTransaction = new ArrayList<Integer>(Arrays.asList(37,38,39,41,42,60,63));
+		
 	// BitField Names:
 	public static final String nameOfbitfield2 = "BITFIELD2";
 	public static final String nameOfbitfield3 = "BITFIELD3";
 	public static final String nameOfbitfield4 = "BITFIELD4";
+	public static final String nameOfbitfield5 = "BITFIELD5";
 	public static final String nameOfbitfield11 = "BITFIELD11";
 	public static final String nameOfbitfield12 = "BITFIELD12";
 	public static final String nameOfbitfield35 = "BITFIELD35";
@@ -79,6 +99,7 @@ public final class Constants {
 	public static final String nameOfbitfield48 = "BITFIELD48";
 	public static final String nameOfbitfield49 = "BITFIELD49";
 	public static final String nameOfbitfield54 = "BITFIELD54";
+	public static final String nameOfbitfield55 = "BITFIELD55";
 	public static final String nameOfbitfield123 = "BITFIELD123";
 	// BitField Values:
 	public static final String valueOfBitfield4 = p.getProperty("valueOfBitfield4");
@@ -100,29 +121,30 @@ public final class Constants {
 	public static final Integer primaryBitmapStartPoint = Integer.parseInt(p.getProperty("primaryBitmapStartPoint"));
 	public static final Integer primaryBitmapEndPoint = Integer.parseInt(p.getProperty("primaryBitmapEndPoint"));
 	public static final Integer primaryBitmapPosition = Integer.parseInt(p.getProperty("primaryBitmapPosition"));
-	public static final Integer secondaryBitmapStartPoint = Integer.parseInt(p.getProperty("secondaryBitmapStartPoint"));
+	public static final Integer secondaryBitmapStartPoint = Integer
+			.parseInt(p.getProperty("secondaryBitmapStartPoint"));
 	public static final Integer secondaryBitmapEndPoint = Integer.parseInt(p.getProperty("secondaryBitmapEndPoint"));
-	public static final Integer secondaryBitmapEndPosition = Integer.parseInt(p.getProperty("secondaryBitmapEndPosition"));
-	
-	
+	public static final Integer secondaryBitmapEndPosition = Integer
+			.parseInt(p.getProperty("secondaryBitmapEndPosition"));
+
 	public static Integer[] generateIntegerArrayFromString(String elementsInTransaction) {
 		elementsInTransaction = elementsInTransaction.replaceAll(" ", "");
 		Integer[] elementsInTransactionArrayIntegers = new Integer[elementsInTransaction.split(",").length];
 		int i = 0;
-		for(String currentString: elementsInTransaction.split(",")) {
+		for (String currentString : elementsInTransaction.split(",")) {
 			elementsInTransactionArrayIntegers[i] = Integer.parseInt(currentString);
 			i++;
-		}		
+		}
 		return elementsInTransactionArrayIntegers;
 	}
-	
-	public static ArrayList<String> generateArrayListFromString(String elementsInTransaction){
+
+	public static ArrayList<String> generateArrayListFromString(String elementsInTransaction) {
 		elementsInTransaction = elementsInTransaction.replace(" ", "");
 		ArrayList<String> elementsInTransactionList = new ArrayList<String>();
-		for(String currentString: elementsInTransaction.split(",")) {
+		for (String currentString : elementsInTransaction.split(",")) {
 			elementsInTransactionList.add(currentString);
 		}
 		return elementsInTransactionList;
 	}
-
+	
 }
