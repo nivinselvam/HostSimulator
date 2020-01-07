@@ -10,6 +10,7 @@ public class HexEncoder {
 			MTItoHex, eHeader, eHeaderToHex;
 
 	private Map<String, String> responseBitFieldsWithValue;
+	Converter converter = new Converter();
 
 	public void setResponseBitFieldsWithValue(Map<String, String> responseBitFieldsWithValue) {
 		this.responseBitFieldsWithValue = responseBitFieldsWithValue;
@@ -67,54 +68,42 @@ public class HexEncoder {
 
 	public void encodeddata() {
 		try {
-			Converter converter = new Converter();
-			MTItoHex = converter.asciitoHex(MTI);
-			
-			eHeaderToHex = converter.asciitoHex(eHeader);
-		
-			//elementsInTransaction = pickElementsInTransaction();
-			// bitmap = generateBinaryData(elementsInTransaction);
-			bitmapToHex = converter.binaryToHex(bitmap);
-			bitfieldValues = generateBitFieldValues();
-			bitfieldValuesToHex = converter.asciitoHex(bitfieldValues);
-			String tempHexData = eHeaderToHex + " " + MTItoHex + " " + bitmapToHex + " " + bitfieldValuesToHex;
-			// encodedHexData = generateEncodedHexData(tempHexData);
-			encodedHexData = tempHexData.replaceAll("\\s", "");
+			if (Main.fepName.equals("HPS")) {
+				encodeDataForHPS();
+			} else if (Main.fepName.equals("FCB")) {
+				encodeDataForFCB();
+			}
+
 		} catch (NullPointerException e) {
 			System.out.println("Unable to encode the data. Please check the data.");
 		}
 
 	}
 
-	// --------------------------------------------------------------------------------------------------
-	/*
-	 * This function is used to identify the bitfields involved in the
-	 * transaction. Takes the bitfieldwithvalues hashmap as input and returns a
-	 * string with numbers representing the bitfields invovled in the
-	 * transaction This takes boolean value as input. If set as true, returns
-	 * elementsInTransaction If set as false, will return the bitfieldvalues
-	 * involved in the transaction
-	 */
-	// ---------------------------------------------------------------------------------------------------
-//	public String pickElementsInTransaction() {
-//		BitFieldData bitFieldData = new BitFieldData(false);
-//		String elementsInTransaction = "", bitFieldValuesInTransaction = "";
-//		for (Map.Entry<String, String> currentEntry : bitFieldData.bitfieldValue.entrySet()) {
-//			if (currentEntry.getValue().equals("") == false) {
-//				elementsInTransaction = elementsInTransaction + currentEntry.getKey().replace("BITFIELD", "") + " ";
-//				// bitFieldValuesInTransaction = bitFieldValuesInTransaction +
-//				// currentEntry.getValue()+" ";
-//			}
-//		}
-//		return elementsInTransaction;
-//
-//	}
+	private void encodeDataForHPS() {
+
+		MTItoHex = converter.asciitoHex(MTI);
+		eHeaderToHex = converter.asciitoHex(eHeader);
+		bitmapToHex = converter.binaryToHex(bitmap);
+		bitfieldValues = generateBitFieldValues();
+		bitfieldValuesToHex = converter.asciitoHex(bitfieldValues);
+		String tempHexData = eHeaderToHex + " " + MTItoHex + " " + bitmapToHex + " " + bitfieldValuesToHex;
+		encodedHexData = tempHexData.replaceAll("\\s", "");
+	}
+
+	private void encodeDataForFCB() {
+		eHeaderToHex = converter.asciitoHex(eHeader);
+		bitmapToHex = converter.binaryToHex(bitmap);
+		bitfieldValues = generateBitFieldValues();
+		String tempHexData = eHeaderToHex + " " + MTI + " " + bitmapToHex + " " + bitfieldValues;
+		encodedHexData = tempHexData.replaceAll("\\s", "");
+	}
 
 	// --------------------------------------------------------------------------------------------------
 	/*
-	 * This function is used to create a bitmap after the elements invovled in
-	 * the transaction are identified. This takes string array of bit field
-	 * numbers as input and generates the bitmap based on it
+	 * This function is used to create a bitmap after the elements invovled in the
+	 * transaction are identified. This takes string array of bit field numbers as
+	 * input and generates the bitmap based on it
 	 */
 	// ---------------------------------------------------------------------------------------------------
 	public String generateBinaryData(String elementsInTransaction) {
@@ -158,8 +147,7 @@ public class HexEncoder {
 		}
 		return binaryData.toString();
 	}
-	
-	
+
 	public static String tgenerateBinaryData(TreeSet<Integer> elementsInTransaction) {
 		StringBuilder binaryData = new StringBuilder();
 		int highestBitfield = elementsInTransaction.last();
@@ -200,10 +188,11 @@ public class HexEncoder {
 		}
 		return binaryData.toString();
 	}
+
 	// --------------------------------------------------------------------------------------------------------------------
 	/*
-	 * This function finds the overall length of the hexData and generates the
-	 * first two bytes of the hex encoding process
+	 * This function finds the overall length of the hexData and generates the first
+	 * two bytes of the hex encoding process
 	 */
 	// --------------------------------------------------------------------------------------------------------------------
 	public String generateEncodedHexData(String hexData) {
@@ -234,52 +223,58 @@ public class HexEncoder {
 
 	// ---------------------------------------------------------------------------------------------------------------------
 	/*
-	 * This function is used to generate string of all the bitfield values
-	 * involved in the transaction Certain bitfield are expected to have
-	 * variable length. So bitfield value is picked from BitfieldValue hashmap
-	 * in Bitfield data file and compared in the bitfieldlength hashmap. If the
-	 * bitfield is a variable length one, then a prefix is added to denote the
-	 * length
+	 * This function is used to generate string of all the bitfield values involved
+	 * in the transaction Certain bitfield are expected to have variable length. So
+	 * bitfield value is picked from BitfieldValue hashmap in Bitfield data file and
+	 * compared in the bitfieldlength hashmap. If the bitfield is a variable length
+	 * one, then a prefix is added to denote the length
 	 */
 	// ---------------------------------------------------------------------------------------------------------------------
 	public String generateBitFieldValues() {
 		String finalBitfieldValues = "", currentBitfield, currentBitfieldLength;
 		BitFieldData bitFieldLength = new BitFieldData();
-		// BitFieldData bitFieldValues = new BitFieldData(false);
-		// for(Map.Entry<String, String> currentEntry :
-		// bitFieldValues.bitfieldValue.entrySet()){
+		int currentBit;
 		for (Map.Entry<String, String> currentEntry : responseBitFieldsWithValue.entrySet()) {
-			if (currentEntry.getValue().equals("") == false) {
-				currentBitfield = currentEntry.getKey();
-				if (bitFieldLength.bitfieldLength.get(currentBitfield) > 0) {
-					int numberOfSpacesRequired = bitFieldLength.bitfieldLength.get(currentBitfield)
-							- currentEntry.getValue().length();
-					String spaces = "";
-					for (int i = 0; i < numberOfSpacesRequired; i++) {
-						spaces = spaces + " ";
-					}
 
+			currentBitfield = currentEntry.getKey();
+			currentBit = Integer.parseInt(currentBitfield.substring(8));
+			if (bitFieldLength.bitfieldLength.get(currentBitfield) > 0) {
+				int numberOfSpacesRequired = bitFieldLength.bitfieldLength.get(currentBitfield)
+						- currentEntry.getValue().length();
+				String spaces = "";
+				for (int i = 0; i < numberOfSpacesRequired; i++) {
+					spaces = spaces + " ";
+				}
+				if (Main.fepName.equals("FCB") && Constants.elementsInHexFormatforFCBTransaction.contains(currentBit)) {
+					finalBitfieldValues = finalBitfieldValues + converter.asciitoHex(currentEntry.getValue() + spaces);
+				} else {
 					finalBitfieldValues = finalBitfieldValues + currentEntry.getValue() + spaces;
-				} else if (bitFieldLength.bitfieldLength.get(currentBitfield) == -2) {
-					currentBitfieldLength = Integer.toString(currentEntry.getValue().length());
-					if (currentBitfieldLength.length() < 2) {
-						currentBitfieldLength = "0" + currentBitfieldLength;
-					}
-					finalBitfieldValues = finalBitfieldValues + currentBitfieldLength + currentEntry.getValue();
-				} else if (bitFieldLength.bitfieldLength.get(currentBitfield) == -3) {
-					currentBitfieldLength = Integer.toString(currentEntry.getValue().length());
-					if (currentBitfieldLength.length() < 3) {
-						if (currentBitfieldLength.length() < 2) {
-							currentBitfieldLength = "00" + currentBitfieldLength;
-						} else {
-							currentBitfieldLength = "0" + currentBitfieldLength;
-						}
-					}
-					finalBitfieldValues = finalBitfieldValues + currentBitfieldLength + currentEntry.getValue();
+				}
+
+			} else if (bitFieldLength.bitfieldLength.get(currentBitfield) == -2) {
+				currentBitfieldLength = currentEntry.getValue().substring(0,2);
+				if (Main.fepName.equals("FCB") && Constants.elementsInHexFormatforFCBTransaction.contains(currentBit)) {
+					finalBitfieldValues = finalBitfieldValues
+							+ converter.asciitoHex(currentBitfieldLength + currentEntry.getValue());
+
+				} else {
+					finalBitfieldValues = finalBitfieldValues + currentBitfieldLength + currentEntry.getValue().substring(2);
+				}
+
+			} else if (bitFieldLength.bitfieldLength.get(currentBitfield) == -3) {
+				currentBitfieldLength = currentEntry.getValue().substring(0,3);
+				if (Main.fepName.equals("FCB") && Constants.elementsInHexFormatforFCBTransaction.contains(currentBit)) {
+					finalBitfieldValues = finalBitfieldValues
+							+ converter.asciitoHex(currentBitfieldLength + currentEntry.getValue());
+
+				} else {
+					finalBitfieldValues = finalBitfieldValues + currentBitfieldLength + currentEntry.getValue().substring(3);
 				}
 			}
+
 		}
 
 		return finalBitfieldValues;
 	}
+
 }

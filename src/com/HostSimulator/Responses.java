@@ -7,8 +7,10 @@
 //
 package com.HostSimulator;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,6 +20,9 @@ public class Responses {
 
 	private String requestPacket, eHeader, requestMTI;
 	Map<String, String> requestBitfieldsWithValues, responseBitfieldswithValue;
+	TreeSet<Integer> elementsInTransaction;
+	SimpleDateFormat sdf;
+	Date date = new Date();
 	HexDecoder decoder;
 
 	public Responses(String requestPacket) {
@@ -59,32 +64,18 @@ public class Responses {
 		System.out.println("Request Packet");
 		decoder.printEncodedData();
 		responseBitfieldswithValue = new TreeMap<>(new BitfieldComparator());
-		
-		if(requestMTI.equals(Constants.authorisationRequestMTI)) {
+
+		if (requestMTI.equals(Constants.authorisationRequestMTI)) {
 			responsePacket = authorizationMessageResponse();
-		}else if(requestMTI.equals(Constants.financialSalesRequestMTI)||requestMTI.equals(Constants.financialForceDraftRequestMTI)) {
+		} else if (requestMTI.equals(Constants.financialSalesRequestMTI)
+				|| requestMTI.equals(Constants.financialForceDraftRequestMTI)) {
 			responsePacket = financialMessageResponse();
-		}else if(requestMTI.equals(Constants.reversalRequestMTI)) {
+		} else if (requestMTI.equals(Constants.reversalRequestMTI)) {
 			responsePacket = reversalMessageResponse();
-		}else if(requestMTI.equals(Constants.reconsillationRequestMTI)) {
+		} else if (requestMTI.equals(Constants.reconsillationRequestMTI)) {
 			responsePacket = reconciliationMessageResponse();
-		}		
-		
-//		switch (requestMTI) {
-//		case "1100":
-//			responsePacket = authorizationMessageResponse();
-//			break;
-//		case "1200":
-//		case "1220":
-//			responsePacket = financialMessageResponse();
-//			break;
-//		case "1420":
-//			responsePacket = reversalMessageResponse();
-//			break;
-//		case "1520":
-//			responsePacket = reconciliationMessageResponse();
-//			break;
-//		}
+		}
+
 		decoder = new HexDecoder(responsePacket);
 		System.out.println("Response Packet");
 		decoder.printEncodedData();
@@ -101,7 +92,7 @@ public class Responses {
 	public String authorizationMessageResponse() {
 		String approveTransaction = Constants.authorizationTransactionResponse;
 		String responsePacket = "", bitmap, bitfield4 = "";
-		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInAuthorisationTransaction));
+		elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInAuthorisationTransaction));
 		generateResponseBitfieldswithValue(elementsInTransaction);
 		boolean isBalanceInquiry = false;
 		if (Constants.balanceInquiryCodes.contains(requestBitfieldsWithValues.get(Constants.nameOfbitfield3))) {
@@ -114,32 +105,38 @@ public class Responses {
 		}
 		switch (approveTransaction) {
 		case "Approve":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval));
 			break;
 		case "Decline":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
 			break;
 		case "PartiallyApprove":
 			bitfield4 = generateHalfAmountForPartialApproval(requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial));
 			break;
 		}
-		//Bitfields for which the values should be generated.		
+		// Bitfields for which the values should be generated.
 		if (approveTransaction.equals("PartiallyApprove") || isBalanceInquiry) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield4, bitfield4);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield4, setBitfieldValue(Constants.nameOfbitfield4, bitfield4));
 		}
 		if (approveTransaction.contentEquals("Approve") || approveTransaction.contentEquals("PartiallyApprove")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield38, Constants.valueOfBitfield38);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield38, setBitfieldValue(Constants.nameOfbitfield38, Constants.valueOfBitfield38));
 			elementsInTransaction.add(38);
 		}
 		if (approveTransaction.equals("Decline")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield44, Constants.valueOfBitfield44);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield44, setBitfieldValue(Constants.nameOfbitfield44, Constants.valueOfBitfield44));
 			elementsInTransaction.add(44);
 		}
 		if (isBalanceInquiry && Main.fepName.equals("HPS")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield54, Constants.valueOfBitfield54);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield54, setBitfieldValue(Constants.nameOfbitfield54, Constants.valueOfBitfield54));
 			elementsInTransaction.add(54);
 		}
+		if (requestBitfieldsWithValues.containsKey(Constants.nameOfbitfield55)) {
+			responseBitfieldswithValue.put(Constants.nameOfbitfield55,
+					requestBitfieldsWithValues.get(Constants.nameOfbitfield55));
+			elementsInTransaction.add(55);
+		}
+
 		addFEPSpecificElements(Constants.authorisationRequestMTI);
 
 		HexEncoder encoder = new HexEncoder(Constants.authorisationResponseMTI, eHeader);
@@ -158,7 +155,7 @@ public class Responses {
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String financialMessageResponse() {
-		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInFinancialTransaction));
+		elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInFinancialTransaction));
 		String approveTransaction = "", responsePacket = "", bitmap, bitfield4 = "", responseMTI = "";
 		generateResponseBitfieldswithValue(elementsInTransaction);
 		// Setting the response MTI bases on the request MTI. Two conditions are checked
@@ -180,36 +177,34 @@ public class Responses {
 		}
 		switch (approveTransaction) {
 		case "Approve":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval));
 			break;
 		case "Decline":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
 			break;
 		case "PartiallyApprove":
 			bitfield4 = generateHalfAmountForPartialApproval(requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
 			responseBitfieldswithValue.put(Constants.nameOfbitfield4,
 					requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial));
 			break;
 		}
-		//Bitfields for which the values should be generated.
-		
+		// Bitfields for which the values should be generated.
+
 		if (approveTransaction.contentEquals("Approve") || approveTransaction.contentEquals("PartiallyApprove")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield38, Constants.valueOfBitfield38);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield38,
+					setBitfieldValue(Constants.nameOfbitfield38, Constants.valueOfBitfield38));
 			elementsInTransaction.add(38);
 		}
 		if (approveTransaction.equals("Decline")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield44, Constants.valueOfBitfield44);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield44,
+					setBitfieldValue(Constants.nameOfbitfield44, Constants.valueOfBitfield44));
 			elementsInTransaction.add(44);
 		}
-		// For SVS cards, DE 54 should be included. This is identified using
-		// bitfield 3.
-		if (Constants.activationRechargeCodes.contains(requestBitfieldsWithValues.get(Constants.nameOfbitfield3))) {
-			if(Main.fepName.equals("HPS")) {
-				responseBitfieldswithValue.put(Constants.nameOfbitfield54, Constants.valueOfBitfield54);
-				elementsInTransaction.add(54);
-			}			
-		}
+
 		addFEPSpecificElements(Constants.financialSalesRequestMTI);
 		HexEncoder encoder = new HexEncoder(responseMTI, eHeader);
 		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
@@ -220,6 +215,16 @@ public class Responses {
 		return responsePacket;
 	}
 
+	private void isDE54RequiredForHPSTransaction(TreeSet<Integer> elementsInTransaction) {
+		if (Constants.activationRechargeCodes.contains(requestBitfieldsWithValues.get(Constants.nameOfbitfield3))) {
+			if (Main.fepName.equals("HPS")) {
+				responseBitfieldswithValue.put(Constants.nameOfbitfield54,
+						setBitfieldValue(Constants.nameOfbitfield54, Constants.valueOfBitfield54));
+				elementsInTransaction.add(54);
+			}
+		}
+	}
+
 	// ------------------------------------------------------------------------------------------------------------------
 	/*
 	 * This method is used to generate the response for a reversal request(1420)
@@ -228,18 +233,18 @@ public class Responses {
 	public String reversalMessageResponse() {
 		String approveTransaction = Constants.reversalTransactionResponse;
 		String responsePacket = "", bitmap, bitfield39 = "";
-		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInReversalTransaction));
+		elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInReversalTransaction));
 		generateResponseBitfieldswithValue(elementsInTransaction);
-		
-		//Bitfields for which the values should be generated.
-		
-		if (approveTransaction.equals("Approve")) {			
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reversal);
-			responseBitfieldswithValue.put(Constants.nameOfbitfield38, Constants.valueOfBitfield38);
+
+		// Bitfields for which the values should be generated.
+
+		if (approveTransaction.equals("Approve")) {
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reversal));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield38, setBitfieldValue(Constants.nameOfbitfield38, Constants.valueOfBitfield38));
 			elementsInTransaction.add(38);
 		} else {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline);
-			responseBitfieldswithValue.put(Constants.nameOfbitfield44, Constants.valueOfBitfield44);
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield44, setBitfieldValue(Constants.nameOfbitfield44, Constants.valueOfBitfield44));
 			elementsInTransaction.add(44);
 		}
 		addFEPSpecificElements(Constants.reversalRequestMTI);
@@ -258,17 +263,17 @@ public class Responses {
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String reconciliationMessageResponse() {
-		String responsePacket = "", bitmap , approveTransaction = Constants.reversalTransactionResponse;
-		TreeSet<Integer> elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInReconsillationTransaction));
+		String responsePacket = "", bitmap, approveTransaction = Constants.reversalTransactionResponse;
+		elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInReconsillationTransaction));
 		generateResponseBitfieldswithValue(elementsInTransaction);
-		//Bitfields for which the values should be generated.
-		if(approveTransaction.equals("")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reconsillation);
-			responseBitfieldswithValue.put(Constants.nameOfbitfield123,Constants.valueOfBitfield123);
-		}else {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline);
+		// Bitfields for which the values should be generated.
+		if (approveTransaction.equals("Approve")) {
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reconsillation));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield123, setBitfieldValue(Constants.nameOfbitfield123, Constants.valueOfBitfield123));
+		} else {
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
 		}
-		responseBitfieldswithValue.put(Constants.nameOfbitfield48, Constants.valueOfBitfield48);
+		responseBitfieldswithValue.put(Constants.nameOfbitfield48, setBitfieldValue(Constants.nameOfbitfield48, Constants.valueOfBitfield48));
 		addFEPSpecificElements(Constants.reconsillationRequestMTI);
 		HexEncoder encoder = new HexEncoder(Constants.reconsillationResponseMTI, eHeader);
 		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
@@ -299,36 +304,52 @@ public class Responses {
 
 	public String generateBitfield2(Map<String, String> requestPacketBitfields) {
 		int endPoint = 0;
+		String bitfield2Value = "", bitfield2Length ="";
 		if (requestPacketBitfields.containsKey(Constants.nameOfbitfield2)) {
-			return removeLLVAR(Constants.nameOfbitfield2, requestPacketBitfields.get(Constants.nameOfbitfield2));
+			return requestPacketBitfields.get(Constants.nameOfbitfield2);
 		} else if (requestPacketBitfields.containsKey(Constants.nameOfbitfield35)) {
 			endPoint = requestPacketBitfields.get(Constants.nameOfbitfield35).indexOf('=');
-			return requestPacketBitfields.get(Constants.nameOfbitfield35).substring(2, endPoint);
+			bitfield2Value = requestPacketBitfields.get(Constants.nameOfbitfield35).substring(2, endPoint);
+			bitfield2Length = Integer.toString(bitfield2Value.length());
+			if(bitfield2Length.length()<2) {
+				return "0"+bitfield2Value.length() + bitfield2Value;
+			}else {
+				return bitfield2Value.length() + bitfield2Value;
+			}
+			
 		} else if (requestPacketBitfields.containsKey(Constants.nameOfbitfield45)) {
 			endPoint = requestPacketBitfields.get(Constants.nameOfbitfield45).indexOf('^');
-			return requestPacketBitfields.get(Constants.nameOfbitfield45).substring(3, endPoint);
+			bitfield2Value = requestPacketBitfields.get(Constants.nameOfbitfield45).substring(3, endPoint);
+			bitfield2Length = Integer.toString(bitfield2Value.length());
+			if(bitfield2Length.length()<2) {
+				return "0"+bitfield2Value.length() + bitfield2Value;
+			}else {
+				return bitfield2Value.length() + bitfield2Value;
+			}
 		}
 		return "";
 	}
-	//------------------------------------------------------------------------------------------------------------------
+
+	// ------------------------------------------------------------------------------------------------------------------
 	/*
 	 * This method is used to create a responsebitfield treemap. Treemap is used to
 	 * make sure the bitfield values are sorted. Numbers of bitfields that are to be
 	 * sent in response should be passed to the method.
 	 */
-	//------------------------------------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------------------------------------
 	public void generateResponseBitfieldswithValue(TreeSet<Integer> elementsInTransaction) {
 		for (Integer currentEntry : elementsInTransaction) {
 			String key = "BITFIELD" + currentEntry;
 			responseBitfieldswithValue.put(key, requestBitfieldsWithValues.get(key));
 		}
 	}
-	//------------------------------------------------------------------------------------------------------------------
+
+	// ------------------------------------------------------------------------------------------------------------------
 	/*
-	 * This method is used to generate a dynamic amount for partial approval.
-	 * This takes transaction amount as input and returns half of it.
+	 * This method is used to generate a dynamic amount for partial approval. This
+	 * takes transaction amount as input and returns half of it.
 	 */
-	//------------------------------------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------------------------------------
 	public String generateHalfAmountForPartialApproval(String transactionAmount) {
 		String bitfield4 = Integer.toString(Integer.parseInt(transactionAmount) / 2);
 		// Bitfield4 has a fixed length of 12 digits and has to have 0's for
@@ -340,21 +361,68 @@ public class Responses {
 		}
 		return tempString + bitfield4;
 	}
-	//------------------------------------------------------------------------------------------------------------------
+
+	// ------------------------------------------------------------------------------------------------------------------
 	/*
-	 * This method is used to add HPS specific data elements
-	 * Transaction type i.e., request MTI should be passed as argument
+	 * This method is used to add HPS specific data elements Transaction type i.e.,
+	 * request MTI should be passed as argument
 	 */
-	//------------------------------------------------------------------------------------------------------------------
+	// ------------------------------------------------------------------------------------------------------------------
 	public void addFEPSpecificElements(String transactionType) {
-		if(Main.fepName.equals("HPS")) {
-			if(!transactionType.equals(Constants.reconsillationRequestMTI)) {
-				responseBitfieldswithValue.put(Constants.nameOfbitfield2, generateBitfield2(requestBitfieldsWithValues));
+		if (Main.fepName.equals("HPS")) {
+			if (!transactionType.equals(Constants.reconsillationRequestMTI)) {
+				responseBitfieldswithValue.put(Constants.nameOfbitfield2,
+						generateBitfield2(requestBitfieldsWithValues));
+				isDE54RequiredForHPSTransaction(elementsInTransaction);
 			}
-		}else if(Main.fepName.equals("INCOMM")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield5, requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+		} else if (Main.fepName.equals("FCB")) {
+			if (!transactionType.equals(Constants.reconsillationRequestMTI)) {
+				sdf = new SimpleDateFormat("HHmmss");
+				responseBitfieldswithValue.put(Constants.nameOfbitfield12, sdf.format(date));
+				sdf = new SimpleDateFormat("MMdd");
+				responseBitfieldswithValue.put(Constants.nameOfbitfield13, sdf.format(date));
+				responseBitfieldswithValue.put(Constants.nameOfbitfield37, setBitfieldValue(Constants.nameOfbitfield37, Constants.valueOfBitfield37));
+			}
+		} else if (Main.fepName.equals("INCOMM")) {
+			responseBitfieldswithValue.put(Constants.nameOfbitfield5,
+					requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
 		}
-		
+
+	}
+	// ------------------------------------------------------------------------------------------------------------------
+	/*
+	 * This method is used to identify the bitfield and add length of bitfield if
+	 * required.
+	 */
+	// ------------------------------------------------------------------------------------------------------------------
+
+	public static String setBitfieldValue(String bitfieldName, String bitfieldValue) {
+		int variableLengthValue;
+		String bitfieldLength;
+		BitFieldData bitfieldData = new BitFieldData();
+		variableLengthValue = bitfieldData.bitfieldLength.get(bitfieldName);
+		if (variableLengthValue > 0) {
+			return bitfieldValue;
+		} else if (variableLengthValue == -2) {
+			bitfieldLength = Integer.toString(bitfieldValue.length());
+			if (bitfieldLength.length() < 2) {
+				bitfieldLength = "0" + bitfieldLength;
+			}
+			return bitfieldLength + bitfieldValue;
+		} else if (variableLengthValue == -3) {
+			bitfieldLength = Integer.toString(bitfieldValue.length());
+			if (bitfieldLength.length() < 3) {
+				if (bitfieldLength.length() < 2) {
+					bitfieldLength = "00" + bitfieldLength;
+				} else {
+					bitfieldLength = "0" + bitfieldLength;
+				}
+			}
+			return bitfieldLength + bitfieldValue;
+		} else {
+			return bitfieldValue;
+		}
+
 	}
 
 }

@@ -89,7 +89,12 @@ public final class Constants {
 	public static final String nameOfbitfield5 = "BITFIELD5";
 	public static final String nameOfbitfield11 = "BITFIELD11";
 	public static final String nameOfbitfield12 = "BITFIELD12";
+	public static final String nameOfbitfield13 = "BITFIELD13";
+	public static final String nameOfbitfield22 = "BITFIELD22";
+	public static final String nameOfbitfield24 = "BITFIELD24";
+	public static final String nameOfbitfield25 = "BITFIELD25";
 	public static final String nameOfbitfield35 = "BITFIELD35";
+	public static final String nameOfbitfield37 = "BITFIELD37";
 	public static final String nameOfbitfield38 = "BITFIELD38";
 	public static final String nameOfbitfield39 = "BITFIELD39";
 	public static final String nameOfbitfield41 = "BITFIELD41";
@@ -98,11 +103,13 @@ public final class Constants {
 	public static final String nameOfbitfield45 = "BITFIELD45";
 	public static final String nameOfbitfield48 = "BITFIELD48";
 	public static final String nameOfbitfield49 = "BITFIELD49";
+	public static final String nameOfbitfield53 = "BITFIELD53";
 	public static final String nameOfbitfield54 = "BITFIELD54";
 	public static final String nameOfbitfield55 = "BITFIELD55";
 	public static final String nameOfbitfield123 = "BITFIELD123";
 	// BitField Values:
 	public static final String valueOfBitfield4 = p.getProperty("valueOfBitfield4");
+	public static final String valueOfBitfield37 = p.getProperty("valueOfBitfield37");
 	public static final String valueOfBitfield38 = p.getProperty("valueOfBitfield38");
 	public static final String ValueOfBitfield39Approval = p.getProperty("ValueOfBitfield39Approval");
 	public static final String ValueOfBitfield39Decline = p.getProperty("ValueOfBitfield39Decline");

@@ -1,27 +1,14 @@
 package com.HostSimulator;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Tester {
 	public static void main(String[] args) {
-		
-		String requestPacket = "0003000001003020078020C0020000300000000001000000319600520001011100344761739001010465D25122011172745689303030303833373031373438363330303030303030303001529F1A0207809A031912279F2701809C01009F03060000000000009F360200025F3401019F2608EEE16075D8468D139F370498F64BEB9F0902008C9F4104000000019F34030103029F02060000000025009F3501259F101706011203A400000F03000000000000000000006DDFD2EC9F330360D8C85F2A020780820258009F1E0838333734333636338407A000000003101095050200008000";
-		HexDecoder decoder = new HexDecoder(requestPacket);
-		decoder.printEncodedData();
-		
-	}	
-	
-	
+		String a = "12345";
+		System.out.println(a.substring(2));
+	}
+
 
 
 }

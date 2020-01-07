@@ -1,6 +1,9 @@
 package com.HostSimulator;
 
 import java.awt.EventQueue;
+import java.util.Arrays;
+import java.util.TreeSet;
+
 import javax.swing.UIManager;
 
 public class Main{
@@ -22,12 +25,13 @@ public class Main{
 //			}
 //		});
 		
-		//Server server = new Server();
+//		Server server = new Server();
 		
-		String requestPacket = "000000030510203800000A80000092000000000303355401033030303330303030303330303030383939303935303030303833";
-		HexDecoder decoder = new HexDecoder(requestPacket);
-		decoder.printEncodedData();
-		//HexEncoder encoder = new HexEncoder(Constants.authorisationResponseMTI, decoder.geteHeader());
+//		String requestPacket = "454800002301000001014320202020000047524D4B000000000000014901313230308030018000C0000401000000000000003030303332393139313132323034343931353330343337313847524D4B2020202047524D4B564649303031202020202030313130314949443034303031203031354550444C3036313020202020203030";
+//		Responses responses = new Responses(requestPacket);
+//		System.out.println(responses.getResponsePacket());
+		
+		
 		
 
 		
