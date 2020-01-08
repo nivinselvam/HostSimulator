@@ -306,7 +306,7 @@ public class HexDecoder {
 			currentBitFieldValue = tempHexData.substring(currentPosition,
 					currentPosition + currentBitfieldLength);
 			currentBitFieldValue = tempString
-					+ converter.hexToASCII(converter.addSpacesToString(currentBitFieldValue));
+					+ currentBitFieldValue;
 			currentPosition = currentPosition + currentBitfieldLength;
 		} else {
 			currentBitfieldLength = Integer

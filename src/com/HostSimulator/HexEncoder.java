@@ -262,7 +262,11 @@ public class HexEncoder {
 				}
 
 			} else if (bitFieldLength.bitfieldLength.get(currentBitfield) == -3) {
-				currentBitfieldLength = currentEntry.getValue().substring(0,3);
+				if(Main.fepName.equals("FCB")) {
+					currentBitfieldLength = "0"+currentEntry.getValue().substring(0,3);
+				}else {
+					currentBitfieldLength = currentEntry.getValue().substring(0,3);
+				}				
 				if (Main.fepName.equals("FCB") && Constants.elementsInHexFormatforFCBTransaction.contains(currentBit)) {
 					finalBitfieldValues = finalBitfieldValues
 							+ converter.asciitoHex(currentBitfieldLength + currentEntry.getValue());
