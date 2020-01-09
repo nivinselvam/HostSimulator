@@ -9,12 +9,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
 public final class Constants {
+	final static Logger logger = Logger.getLogger(Constants.class);
 	public static Properties p = new Properties();
 
 	static {
 		String fepFile = null;
-
+		PropertyConfigurator.configure("log4j.properties");
 		switch (Main.fepName) {
 		case "HPS":
 			fepFile = "HPSConstants.properties";
@@ -25,6 +29,8 @@ public final class Constants {
 		case "INCOMM":
 			fepFile = "IncommConstants.properties";
 			break;
+		default:
+			logger.fatal("This simulator doesnt support the entered FEP name");
 		}
 
 		File file = new File(fepFile);
