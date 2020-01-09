@@ -16,8 +16,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-public class Responses {
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
+public class Responses {
+	final static Logger logger = Logger.getLogger(Responses.class);
 	private String requestPacket, eHeader, requestMTI;
 	Map<String, String> requestBitfieldsWithValues, responseBitfieldswithValue;
 	TreeSet<Integer> elementsInTransaction;
@@ -27,6 +30,7 @@ public class Responses {
 
 	public Responses(String requestPacket) {
 		this.requestPacket = requestPacket;
+		PropertyConfigurator.configure("log4j.properties");
 	}
 
 	public Map<String, String> getResponseBitfieldswithValue() {
@@ -41,11 +45,13 @@ public class Responses {
 	// ----------------------------------------------------------------------------------------------------------------
 	public String echoMessageResponse() {
 		StringBuffer responsePacket = new StringBuffer(this.requestPacket);
-		for (int i = 0; i < responsePacket.length(); i++) {
-			if (i == 8 || i == 9) {
-				responsePacket.setCharAt(i, '0');
+		if(Main.fepName.equals("HPS")) {
+			for (int i = 0; i < responsePacket.length(); i++) {
+				if (i == 8 || i == 9) {
+					responsePacket.setCharAt(i, '0');
+				}
 			}
-		}
+		}		
 		return responsePacket.toString();
 	}
 
@@ -61,7 +67,7 @@ public class Responses {
 		eHeader = decoder.geteHeader();
 		requestMTI = decoder.getMTI();
 		requestBitfieldsWithValues = decoder.getBitFieldwithValues();
-		System.out.println("Request Packet");
+		logger.info("Request Packet");
 		decoder.printEncodedData();
 		responseBitfieldswithValue = new TreeMap<>(new BitfieldComparator());
 
@@ -74,10 +80,12 @@ public class Responses {
 			responsePacket = reversalMessageResponse();
 		} else if (requestMTI.equals(Constants.reconsillationRequestMTI)) {
 			responsePacket = reconciliationMessageResponse();
+		} else {
+			logger.error("Provided MTI is invalid for creating the response packet.");
 		}
 
 		decoder = new HexDecoder(responsePacket);
-		System.out.println("Response Packet");
+		logger.info("Response Packet");
 		decoder.printEncodedData();
 		return responsePacket;
 	}
@@ -105,30 +113,37 @@ public class Responses {
 		}
 		switch (transactionResult) {
 		case "Approve":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval));
 			break;
 		case "Decline":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
 			break;
 		case "PartiallyApprove":
 			bitfield4 = generateHalfAmountForPartialApproval(requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial));
 			break;
 		}
 		// Bitfields for which the values should be generated.
 		if (transactionResult.equals("PartiallyApprove") || isBalanceInquiry) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield4, setBitfieldValue(Constants.nameOfbitfield4, bitfield4));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield4,
+					setBitfieldValue(Constants.nameOfbitfield4, bitfield4));
 		}
 		if (transactionResult.contentEquals("Approve") || transactionResult.contentEquals("PartiallyApprove")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield38, setBitfieldValue(Constants.nameOfbitfield38, Constants.valueOfBitfield38));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield38,
+					setBitfieldValue(Constants.nameOfbitfield38, Constants.valueOfBitfield38));
 			elementsInTransaction.add(38);
 		}
 		if (transactionResult.equals("Decline")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield44, setBitfieldValue(Constants.nameOfbitfield44, Constants.valueOfBitfield44));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield44,
+					setBitfieldValue(Constants.nameOfbitfield44, Constants.valueOfBitfield44));
 			elementsInTransaction.add(44);
 		}
 		if (isBalanceInquiry && Main.fepName.equals("HPS")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield54, setBitfieldValue(Constants.nameOfbitfield54, Constants.valueOfBitfield54));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield54,
+					setBitfieldValue(Constants.nameOfbitfield54, Constants.valueOfBitfield54));
 			elementsInTransaction.add(54);
 		}
 		if (requestBitfieldsWithValues.containsKey(Constants.nameOfbitfield55)) {
@@ -239,12 +254,16 @@ public class Responses {
 		// Bitfields for which the values should be generated.
 
 		if (transactionResult.equals("Approve")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reversal));
-			responseBitfieldswithValue.put(Constants.nameOfbitfield38, setBitfieldValue(Constants.nameOfbitfield38, Constants.valueOfBitfield38));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reversal));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield38,
+					setBitfieldValue(Constants.nameOfbitfield38, Constants.valueOfBitfield38));
 			elementsInTransaction.add(38);
 		} else {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
-			responseBitfieldswithValue.put(Constants.nameOfbitfield44, setBitfieldValue(Constants.nameOfbitfield44, Constants.valueOfBitfield44));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield44,
+					setBitfieldValue(Constants.nameOfbitfield44, Constants.valueOfBitfield44));
 			elementsInTransaction.add(44);
 		}
 		addFEPSpecificElements(Constants.reversalRequestMTI, transactionResult);
@@ -268,11 +287,14 @@ public class Responses {
 		generateResponseBitfieldswithValue(elementsInTransaction);
 		// Bitfields for which the values should be generated.
 		if (transactionResult.equals("Approve")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reconsillation));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reconsillation));
 		} else {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39, setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
 		}
-		responseBitfieldswithValue.put(Constants.nameOfbitfield48, setBitfieldValue(Constants.nameOfbitfield48, Constants.valueOfBitfield48));
+		responseBitfieldswithValue.put(Constants.nameOfbitfield48,
+				setBitfieldValue(Constants.nameOfbitfield48, Constants.valueOfBitfield48));
 		addFEPSpecificElements(Constants.reconsillationRequestMTI, transactionResult);
 		HexEncoder encoder = new HexEncoder(Constants.reconsillationResponseMTI, eHeader);
 		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
@@ -303,26 +325,26 @@ public class Responses {
 
 	public String generateBitfield2(Map<String, String> requestPacketBitfields) {
 		int endPoint = 0;
-		String bitfield2Value = "", bitfield2Length ="";
+		String bitfield2Value = "", bitfield2Length = "";
 		if (requestPacketBitfields.containsKey(Constants.nameOfbitfield2)) {
 			return requestPacketBitfields.get(Constants.nameOfbitfield2);
 		} else if (requestPacketBitfields.containsKey(Constants.nameOfbitfield35)) {
 			endPoint = requestPacketBitfields.get(Constants.nameOfbitfield35).indexOf('=');
 			bitfield2Value = requestPacketBitfields.get(Constants.nameOfbitfield35).substring(2, endPoint);
 			bitfield2Length = Integer.toString(bitfield2Value.length());
-			if(bitfield2Length.length()<2) {
-				return "0"+bitfield2Value.length() + bitfield2Value;
-			}else {
+			if (bitfield2Length.length() < 2) {
+				return "0" + bitfield2Value.length() + bitfield2Value;
+			} else {
 				return bitfield2Value.length() + bitfield2Value;
 			}
-			
+
 		} else if (requestPacketBitfields.containsKey(Constants.nameOfbitfield45)) {
 			endPoint = requestPacketBitfields.get(Constants.nameOfbitfield45).indexOf('^');
 			bitfield2Value = requestPacketBitfields.get(Constants.nameOfbitfield45).substring(3, endPoint);
 			bitfield2Length = Integer.toString(bitfield2Value.length());
-			if(bitfield2Length.length()<2) {
-				return "0"+bitfield2Value.length() + bitfield2Value;
-			}else {
+			if (bitfield2Length.length() < 2) {
+				return "0" + bitfield2Value.length() + bitfield2Value;
+			} else {
 				return bitfield2Value.length() + bitfield2Value;
 			}
 		}
@@ -340,6 +362,7 @@ public class Responses {
 		for (Integer currentEntry : elementsInTransaction) {
 			String key = "BITFIELD" + currentEntry;
 			responseBitfieldswithValue.put(key, requestBitfieldsWithValues.get(key));
+			logger.debug(key+":"+requestBitfieldsWithValues.get(key)+" added to the response bitfield map");
 		}
 	}
 
@@ -373,18 +396,20 @@ public class Responses {
 				responseBitfieldswithValue.put(Constants.nameOfbitfield2,
 						generateBitfield2(requestBitfieldsWithValues));
 				isDE54RequiredForHPSTransaction(elementsInTransaction);
-			}else {
-				if(transactionResult.equals("Approve")) {
-					responseBitfieldswithValue.put(Constants.nameOfbitfield123, setBitfieldValue(Constants.nameOfbitfield123, Constants.valueOfBitfield123));
+			} else {
+				if (transactionResult.equals("Approve")) {
+					responseBitfieldswithValue.put(Constants.nameOfbitfield123,
+							setBitfieldValue(Constants.nameOfbitfield123, Constants.valueOfBitfield123));
 				}
 			}
 		} else if (Main.fepName.equals("FCB")) {
-				sdf = new SimpleDateFormat("HHmmss");
-				responseBitfieldswithValue.put(Constants.nameOfbitfield12, sdf.format(date));
-				sdf = new SimpleDateFormat("MMdd");
-				responseBitfieldswithValue.put(Constants.nameOfbitfield13, sdf.format(date));
-				responseBitfieldswithValue.put(Constants.nameOfbitfield37, setBitfieldValue(Constants.nameOfbitfield37, Constants.valueOfBitfield37));
-			
+			sdf = new SimpleDateFormat("HHmmss");
+			responseBitfieldswithValue.put(Constants.nameOfbitfield12, sdf.format(date));
+			sdf = new SimpleDateFormat("MMdd");
+			responseBitfieldswithValue.put(Constants.nameOfbitfield13, sdf.format(date));
+			responseBitfieldswithValue.put(Constants.nameOfbitfield37,
+					setBitfieldValue(Constants.nameOfbitfield37, Constants.valueOfBitfield37));
+
 		} else if (Main.fepName.equals("INCOMM")) {
 			responseBitfieldswithValue.put(Constants.nameOfbitfield5,
 					requestBitfieldsWithValues.get(Constants.nameOfbitfield4));

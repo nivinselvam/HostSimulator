@@ -2,13 +2,13 @@ package com.HostSimulator;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 import com.HostSimulator.BitFieldData;
 
 public class HexDecoder {
-
-	static final Logger log = Logger.getLogger("HexDecoder.class");
+	final static Logger logger = Logger.getLogger(HexDecoder.class);
 	public static Converter converter = new Converter();
 	private int dataLength, currentPosition;
 	private String eHeader, MTI, primaryBitMap, secondaryBitmap, consolidatedBitmap;
@@ -17,8 +17,9 @@ public class HexDecoder {
 	public HexDecoder(String hexData) {
 		try {
 			decodedData(hexData);
+			PropertyConfigurator.configure("log4j.properties");
 		} catch (NumberFormatException e) {
-			System.out.println("Request packet Format error. Please make sure the Hex data is correct");
+			logger.fatal("Request packet Format error. Please make sure the Hex data is correct");
 		}
 
 	}
@@ -57,13 +58,16 @@ public class HexDecoder {
 	 */
 	// -----------------------------------------------------------------------------------------------------------
 	public void decodedData(String hexData) {
+		logger.debug("Starting the decoding of packet");
 		hexData = converter.addSpacesToString(hexData);
 		Boolean isSecondaryBitmapAvailable = false;
 		String hexDataLengthValue, primaryBitmapValue, secondaryBitmapValue;
 		try {
 			eHeader = converter.hexToASCII(hexData.substring(Constants.eHeaderStartPoint, Constants.eHeaderEndPoint));
+			logger.debug("Header is set as "+ eHeader);
 		} catch (NumberFormatException e) {
 			eHeader = "";
+			logger.warn("Header is empty");
 		}
 
 		if (hexData.length() > Constants.eHeaderEndPoint) {
@@ -74,16 +78,18 @@ public class HexDecoder {
 			} else {
 				MTI = converter.hexToASCII(hexData.substring(Constants.mtiStartPoint, Constants.mtiEndPoint));
 			}
-
+			logger.debug("MTI is set as "+MTI);
 			// Grep the primary bitmap from hexData
 			primaryBitmapValue = hexData.substring(Constants.primaryBitmapStartPoint, Constants.primaryBitmapEndPoint);
 			primaryBitMap = converter.hexToBinary(primaryBitmapValue);
+			logger.debug("Primary bitmap has been set as "+primaryBitmapValue);
 			// While creating a bitfieldAndValueMapping spaces in the hexdata will be
 			// removed.
 			// Hence current position should be calculated by removing spaces.
 			currentPosition = Constants.primaryBitmapPosition;
 			if (primaryBitMap.charAt(0) == '1') {
 				isSecondaryBitmapAvailable = true;
+				logger.debug("Secondary bitmap is available");
 			}
 
 			// Grep the secondary bitmap from hex Data if available
@@ -92,6 +98,7 @@ public class HexDecoder {
 						Constants.secondaryBitmapEndPoint);
 				secondaryBitmap = converter.hexToBinary(secondaryBitmapValue);
 				currentPosition = Constants.secondaryBitmapEndPosition;
+				logger.debug("Secondary Bitmap is set as "+secondaryBitmapValue);
 			}
 
 			// Bitmap consolidation
@@ -100,7 +107,8 @@ public class HexDecoder {
 			} else {
 				consolidatedBitmap = primaryBitMap.replaceAll("\\s", "");
 			}
-
+			logger.debug("Consolidated bitmap is set as "+ consolidatedBitmap);
+			logger.debug("Trying to identify the bitfields with values");
 			// identify the bitfields involved in the transaction
 			if (Main.fepName.equals("FCB")) {
 				bitFieldwithValues = bitfieldAndValueMappingForFCB(consolidatedBitmap, hexData);
@@ -144,11 +152,13 @@ public class HexDecoder {
 		String[] elements = tempString.split(" ");
 		for (String element : elements) {
 			String currentBitField = "BITFIELD" + element, currentBitFieldValue;
+			logger.debug("Trying to add "+currentBitField+" and its values to the map");
 			int currentBitfieldLength = (bitfieldLength.bitfieldLength.get(currentBitField)) * 2;
 			if (currentBitfieldLength > 0 && (currentBitField.equals("BITFIELD1")) == false) {
 				currentBitFieldValue = tempHexData.substring(currentPosition, currentPosition + currentBitfieldLength);
 				currentBitFieldValue = converter.hexToASCII(converter.addSpacesToString(currentBitFieldValue));
 				bitfieldAndValueMap.put(currentBitField, currentBitFieldValue);
+				logger.debug(currentBitField +" with value "+currentBitFieldValue+" successfully added");
 				currentPosition = currentPosition + currentBitfieldLength;
 			} else if (currentBitfieldLength == -4) {
 				currentBitfieldLength = Integer.parseInt(converter.hexToASCII(
@@ -163,6 +173,7 @@ public class HexDecoder {
 				currentBitFieldValue = tempString
 						+ converter.hexToASCII(converter.addSpacesToString(currentBitFieldValue));
 				bitfieldAndValueMap.put(currentBitField, currentBitFieldValue);
+				logger.debug(currentBitField +" with value "+currentBitFieldValue+" successfully added");
 				currentPosition = currentPosition + currentBitfieldLength;
 			} else if (currentBitfieldLength == -6) {
 
@@ -182,6 +193,7 @@ public class HexDecoder {
 				currentBitFieldValue = tempString
 						+ converter.hexToASCII(converter.addSpacesToString(currentBitFieldValue));
 				bitfieldAndValueMap.put(currentBitField, currentBitFieldValue);
+				logger.debug(currentBitField +" with value "+currentBitFieldValue+" successfully added");
 				currentPosition = currentPosition + currentBitfieldLength;
 			}
 
@@ -203,6 +215,7 @@ public class HexDecoder {
 		String[] elements = tempString.split(" ");
 		for (String element : elements) {
 			String currentBitField = "BITFIELD" + element, currentBitFieldValue;
+			logger.debug("Adding "+currentBitField+" and its values to the map");
 			int currentBitfieldLength = (bitfieldLength.bitfieldLength.get(currentBitField));
 			currentBitfieldLength = defineBitfieldLengthForFCBTransaction(element, currentBitfieldLength);
 			if (currentBitfieldLength > 0 && (currentBitField.equals("BITFIELD1")) == false) {
@@ -212,6 +225,7 @@ public class HexDecoder {
 					currentBitFieldValue = tempHexData.substring(currentPosition, currentPosition + currentBitfieldLength);
 				}				
 				bitfieldAndValueMap.put(currentBitField, currentBitFieldValue);
+				logger.debug(currentBitField +" with value "+currentBitFieldValue+" successfully added");
 				currentPosition = currentPosition + currentBitfieldLength;
 			} else if (currentBitfieldLength == -2 || currentBitfieldLength == -4) {
 				fcbLLVARCalculationOFBitfield(bitfieldAndValueMap, tempHexData, element, currentBitField);
@@ -274,7 +288,7 @@ public class HexDecoder {
 						currentPosition + currentBitfieldLength);
 				currentPosition = currentPosition + currentBitfieldLength;
 			}
-			// Since the value is multipled by 2 previously, should be divided to get the
+			// Since the value is multiplied by 2 previously, should be divided to get the
 			// actual value
 			if (currentBitField.equals(Constants.nameOfbitfield55)) {
 				currentBitfieldLength = currentBitfieldLength / 2;
@@ -282,6 +296,7 @@ public class HexDecoder {
 
 		}
 		bitfieldAndValueMap.put(currentBitField, currentBitfieldLength + currentBitFieldValue);
+		logger.debug(currentBitField +" with value "+currentBitFieldValue+" successfully added");
 	}
 	
 	// -----------------------------------------------------------------------------------------------------------------------------------------
@@ -325,6 +340,7 @@ public class HexDecoder {
 			}
 		}
 		bitfieldAndValueMap.put(currentBitField, currentBitFieldValue);
+		logger.debug(currentBitField +" with value "+currentBitFieldValue+" successfully added");
 	}
 	// -----------------------------------------------------------------------------------------------------------------------------------------
 	/*
@@ -349,16 +365,16 @@ public class HexDecoder {
 	 */
 	// -----------------------------------------------------------------------------------------------------------------------------------------
 	public void printEncodedData() {
-		System.out.println("------------------------------------");
+		logger.info("--------------------------------------------------------------------------------------------------------------");
 		try {
-			System.out.println("eHeader: " + eHeader);
-			System.out.println("MTI: " + MTI);
+			logger.info("eHeader: " + eHeader);
+			logger.info("MTI: " + MTI);
 			for (Map.Entry<String, String> currentEntry : bitFieldwithValues.entrySet()) {
-				System.out.println(currentEntry.getKey() + ": " + currentEntry.getValue());
+				logger.info(currentEntry.getKey() + ": " + currentEntry.getValue());
 			}
-			System.out.println("------------------------------------");
+			logger.info("--------------------------------------------------------------------------------------------------------------");
 		} catch (NullPointerException e) {
-			System.out.println("Few data unavailable");
+			logger.error("Few data unavailable for decoding");
 		}
 
 	}

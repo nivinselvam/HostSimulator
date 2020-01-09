@@ -2,9 +2,16 @@ package com.HostSimulator;
 
 import java.nio.charset.Charset;
 
-public class Converter {
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
+public class Converter {
+	final static Logger logger = Logger.getLogger(Converter.class);
 	public static String[] tempArray;
+	
+	Converter(){
+		PropertyConfigurator.configure("log4j.properties");
+	}
 
 	// ---------------------------------------------------------------------------------------------------
 	/*
@@ -107,20 +114,25 @@ public class Converter {
 	 * after every two characters to convert into byte format
 	 */
 	// ---------------------------------------------------------------------------------------------------------------
-	public String asciitoHex(String asciiValue) {
-		char[] chars = asciiValue.toCharArray();
+	public String asciitoHex(String asciiValue) {		
 		StringBuffer hex = new StringBuffer();
-		String tempString = "";
-		for (int i = 0; i < chars.length; i++) {
-			tempString = Integer.toHexString((int) chars[i]);
-			if (tempString.length() == 2) {
-				hex.append(tempString);
-			} else {
-				hex.append("0" + tempString);
-			}
+		try {
+			char[] chars = asciiValue.toCharArray();
+			String tempString = "";
+			for (int i = 0; i < chars.length; i++) {
+				tempString = Integer.toHexString((int) chars[i]);
+				if (tempString.length() == 2) {
+					hex.append(tempString);
+				} else {
+					hex.append("0" + tempString);
+				}
 
-		}
-		hex = new StringBuffer(addSpacesToString(hex.toString()));
+			}
+			hex = new StringBuffer(addSpacesToString(hex.toString()));
+			logger.debug("Ascii Value "+asciiValue+" was converted to hex value "+ hex);
+		}catch(Exception e) {
+			logger.error("Unable to perform ascii to hex operation on value "+asciiValue);
+		}		
 		return hex.toString();
 	}
 
@@ -132,25 +144,28 @@ public class Converter {
 	 */
 	// ---------------------------------------------------------------------------------------------------------------
 	public String binaryToHex(String bitmap) {
-		
-		if(bitmap.contains(" ")==false){
-			StringBuffer sb = new StringBuffer(bitmap);
-			for (int i = 8; i < sb.length(); i += 9) {
-				sb.insert(i, " ");
-			}
-			bitmap = sb.toString();
-		}
-		
 		String hexData = "", currentElementHexValue = "";
-		tempArray = bitmap.split(" ");
-		for (String currentElement : tempArray) {
-			currentElementHexValue = String.format("%X", Long.parseLong(currentElement, 2));
-			if (currentElementHexValue.length() == 2) {
-				hexData = hexData + currentElementHexValue + " ";
-			} else {
-				hexData = hexData + "0" + currentElementHexValue + " ";
+		try {
+			if(bitmap.contains(" ")==false){
+				StringBuffer sb = new StringBuffer(bitmap);
+				for (int i = 8; i < sb.length(); i += 9) {
+					sb.insert(i, " ");
+				}
+				bitmap = sb.toString();
+			}		
+			tempArray = bitmap.split(" ");
+			for (String currentElement : tempArray) {
+				currentElementHexValue = String.format("%X", Long.parseLong(currentElement, 2));
+				if (currentElementHexValue.length() == 2) {
+					hexData = hexData + currentElementHexValue + " ";
+				} else {
+					hexData = hexData + "0" + currentElementHexValue + " ";
+				}
 			}
-		}
+			logger.debug("Binary value "+bitmap+" was converted to hex value "+hexData.trim());
+		}catch(Exception e) {
+			logger.error("Unable to convert the binary value "+bitmap+" to hex");
+		}		
 		return hexData.trim();
 	}
 	

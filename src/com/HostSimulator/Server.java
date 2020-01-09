@@ -14,8 +14,11 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-public class Server {
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
+public class Server {
+	
 	static {
 		TrustManager[] trustAllCertificates = new TrustManager[] { new X509TrustManager() {
 
@@ -58,16 +61,19 @@ public class Server {
 			throw new ExceptionInInitializerError(e);
 		}
 	}
-
+	final static Logger logger = Logger.getLogger(Server.class);
+	
 	ServerSocket ss;
 	ArrayList<ServerConnection> connections = new ArrayList<ServerConnection>();
 	boolean shouldRun = true;
 
 	public Server() {
 		try {
+			PropertyConfigurator.configure("log4j.properties");
 			ss = new ServerSocket(15031);
 			SimulatorGUI gui = new SimulatorGUI();
 			System.out.println("Server started");
+			logger.info(Main.fepName+" Server started successfully");
 			gui.setServerStatus("Running");
 			while (shouldRun) {
 				Socket s = ss.accept();
@@ -75,9 +81,8 @@ public class Server {
 				sc.start();
 				connections.add(sc);
 			}
-
 		} catch (Exception e) {
-
+			logger.fatal("Unable to start the server");
 		}
 
 	}

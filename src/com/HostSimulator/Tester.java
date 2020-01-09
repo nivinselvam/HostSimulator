@@ -1,14 +1,21 @@
 package com.HostSimulator;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
+
+
+
 public class Tester {
+
+	
 	public static void main(String[] args) {
-		String a = "12345";
-		System.out.println(a.substring(2));
+		StringBuffer sb = new StringBuffer(null);
+		System.out.println(sb.reverse());
 	}
-
-
-
 }

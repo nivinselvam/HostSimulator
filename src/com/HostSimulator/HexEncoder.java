@@ -3,9 +3,13 @@ package com.HostSimulator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
 import com.HostSimulator.BitFieldData;
 
 public class HexEncoder {
+	final static Logger logger = Logger.getLogger(HexEncoder.class);
 	private String encodedHexData, elementsInTransaction, bitmap, bitmapToHex, bitfieldValues, bitfieldValuesToHex, MTI,
 			MTItoHex, eHeader, eHeaderToHex;
 
@@ -51,7 +55,7 @@ public class HexEncoder {
 	public HexEncoder(String MTI, String eHeader) {
 		this.MTI = MTI;
 		this.eHeader = eHeader;
-		// encodeddata();
+		PropertyConfigurator.configure("log4j.properties");
 	}
 
 	public String getHexData() {
@@ -75,13 +79,13 @@ public class HexEncoder {
 			}
 
 		} catch (NullPointerException e) {
-			System.out.println("Unable to encode the data. Please check the data.");
+			logger.fatal("Unable to encode the given data");
 		}
 
 	}
 
 	private void encodeDataForHPS() {
-
+		logger.debug("Starting the encoding of response packet");
 		MTItoHex = converter.asciitoHex(MTI);
 		eHeaderToHex = converter.asciitoHex(eHeader);
 		bitmapToHex = converter.binaryToHex(bitmap);
@@ -92,6 +96,7 @@ public class HexEncoder {
 	}
 
 	private void encodeDataForFCB() {
+		logger.debug("Starting the encoding of response packet");
 		eHeaderToHex = converter.asciitoHex(eHeader);
 		bitmapToHex = converter.binaryToHex(bitmap);
 		bitfieldValues = generateBitFieldValues();
@@ -214,7 +219,7 @@ public class HexEncoder {
 			lengthConvertedToHex = "0" + lengthConvertedToHex;
 			break;
 		default:
-			System.out.println("Generated Hex Data is null");
+			logger.warn("Generated Hex Data is null");
 		}
 
 		finalHexData = converter.addSpacesToString(lengthConvertedToHex) + " " + hexData;
@@ -234,9 +239,10 @@ public class HexEncoder {
 		String finalBitfieldValues = "", currentBitfield, currentBitfieldLength;
 		BitFieldData bitFieldLength = new BitFieldData();
 		int currentBit;
+		logger.debug("Trying to generate the bitfield values");
 		for (Map.Entry<String, String> currentEntry : responseBitFieldsWithValue.entrySet()) {
-
 			currentBitfield = currentEntry.getKey();
+			logger.debug("Generating the value of " + currentBitfield);
 			currentBit = Integer.parseInt(currentBitfield.substring(8));
 			if (bitFieldLength.bitfieldLength.get(currentBitfield) > 0) {
 				int numberOfSpacesRequired = bitFieldLength.bitfieldLength.get(currentBitfield)
@@ -250,30 +256,36 @@ public class HexEncoder {
 				} else {
 					finalBitfieldValues = finalBitfieldValues + currentEntry.getValue() + spaces;
 				}
-
+				logger.debug("Value of " + currentBitfield + ", " + currentEntry.getValue()
+						+ " was added to the response string");
 			} else if (bitFieldLength.bitfieldLength.get(currentBitfield) == -2) {
-				currentBitfieldLength = currentEntry.getValue().substring(0,2);
+				currentBitfieldLength = currentEntry.getValue().substring(0, 2);
 				if (Main.fepName.equals("FCB") && Constants.elementsInHexFormatforFCBTransaction.contains(currentBit)) {
 					finalBitfieldValues = finalBitfieldValues
 							+ converter.asciitoHex(currentBitfieldLength + currentEntry.getValue());
 
 				} else {
-					finalBitfieldValues = finalBitfieldValues + currentBitfieldLength + currentEntry.getValue().substring(2);
+					finalBitfieldValues = finalBitfieldValues + currentBitfieldLength
+							+ currentEntry.getValue().substring(2);
 				}
-
+				logger.debug("Value of " + currentBitfield + " " + currentEntry.getValue()
+						+ " was added to the response string");
 			} else if (bitFieldLength.bitfieldLength.get(currentBitfield) == -3) {
-				if(Main.fepName.equals("FCB")) {
-					currentBitfieldLength = "0"+currentEntry.getValue().substring(0,3);
-				}else {
-					currentBitfieldLength = currentEntry.getValue().substring(0,3);
-				}				
+				if (Main.fepName.equals("FCB")) {
+					currentBitfieldLength = "0" + currentEntry.getValue().substring(0, 3);
+				} else {
+					currentBitfieldLength = currentEntry.getValue().substring(0, 3);
+				}
 				if (Main.fepName.equals("FCB") && Constants.elementsInHexFormatforFCBTransaction.contains(currentBit)) {
 					finalBitfieldValues = finalBitfieldValues
 							+ converter.asciitoHex(currentBitfieldLength + currentEntry.getValue());
 
 				} else {
-					finalBitfieldValues = finalBitfieldValues + currentBitfieldLength + currentEntry.getValue().substring(3);
+					finalBitfieldValues = finalBitfieldValues + currentBitfieldLength
+							+ currentEntry.getValue().substring(3);
 				}
+				logger.debug("Value of " + currentBitfield + " " + currentEntry.getValue()
+						+ " was added to the response string");
 			}
 
 		}
