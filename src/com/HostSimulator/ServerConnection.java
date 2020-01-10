@@ -7,7 +7,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+
 public class ServerConnection extends Thread {
+	final static Logger logger = Logger.getLogger(ServerConnection.class);
 	Socket socket;
 	Server server;
 	DataInputStream din;
@@ -20,6 +24,7 @@ public class ServerConnection extends Thread {
 		super("ServerConnectionThread");
 		this.socket = socket;
 		this.server = server;
+		PropertyConfigurator.configure("log4j.properties");
 	}
 
 	public void sendStringtoClient(String text) {
@@ -45,7 +50,8 @@ public class ServerConnection extends Thread {
 
 	public void run() {
 		String msgin = "", msgout = "";
-		System.out.println("Client is connected");
+		System.out.println(socket.getRemoteSocketAddress().toString()+" is connected");
+		logger.info("Client "+socket.getRemoteSocketAddress().toString()+" is connected");
 		try {
 			din = new DataInputStream(socket.getInputStream());
 			dout = new DataOutputStream(socket.getOutputStream());
@@ -59,10 +65,18 @@ public class ServerConnection extends Thread {
 					}
 
 				}
-
-				int msgSize = din.readShort();
-				byte[] message = new byte[msgSize - 2];
-				din.read(message, 0, msgSize - 2);
+				
+				//HPS Sends the Data length in the first 2 bytes but other FEPs don't send.
+				int msgSize = 0;
+				if(Main.fepName.equals("HPS")) {
+					msgSize = din.readShort()-2;
+				}else {
+					msgSize = din.available();
+				}
+				
+				byte[] message = new byte[msgSize];
+				din.read(message, 0, msgSize);
+				
 
 				StringBuffer requestPacket = new StringBuffer();
 				for (byte currByte : message) {
@@ -70,6 +84,10 @@ public class ServerConnection extends Thread {
 				}
 				
 				responses = new Responses(requestPacket.toString());
+				logger.info("*************************************************************************************************");
+				logger.info("                                  Start of Transaction");
+				logger.info("*************************************************************************************************");
+				logger.debug(requestPacket.toString());
 				String responsePacket = "";
 				if (msgSize < 33) {
 					responsePacket = responses.echoMessageResponse();
@@ -77,7 +95,9 @@ public class ServerConnection extends Thread {
 					responsePacket = responses.getResponsePacket();
 				}				
 				sendStringtoClient(responsePacket);
-
+				logger.info("*************************************************************************************************");
+				logger.info("                                   End of Transaction");
+				logger.info("*************************************************************************************************");
 			}
 			din.close();
 			dout.close();
