@@ -17,8 +17,8 @@ public class BitFieldData {
 	public Map<String, Integer> bitfieldLength = new HashMap<String, Integer>();
 
 	public BitFieldData() {
-		if(Main.fepName.equals("HPS")) {
-			//Bitfield lengths are based on ISO 8583 - 1993 version
+		if (Main.fepName.equals("HPS")) {
+			// Bitfield lengths are based on ISO 8583 - 1993 version
 			bitfieldLength.put("BITFIELD1", 8);
 			bitfieldLength.put("BITFIELD2", -2);
 			bitfieldLength.put("BITFIELD3", 6);
@@ -147,8 +147,8 @@ public class BitFieldData {
 			bitfieldLength.put("BITFIELD126", -3);
 			bitfieldLength.put("BITFIELD127", -3);
 			bitfieldLength.put("BITFIELD128", 0);
-		}else {
-			//Bitfield lengths are based on ISO 8583 - 1987 version
+		} else if (Main.fepName.equals("FCB")) {
+			// Bitfield lengths are based on ISO 8583 - 1987 version
 			bitfieldLength.put("BITFIELD1", 8);
 			bitfieldLength.put("BITFIELD2", -2);
 			bitfieldLength.put("BITFIELD3", 6);
@@ -277,7 +277,138 @@ public class BitFieldData {
 			bitfieldLength.put("BITFIELD126", -3);
 			bitfieldLength.put("BITFIELD127", -3);
 			bitfieldLength.put("BITFIELD128", 8);
+		} else if (Main.fepName.equals("INCOMM")) {
+			// Bitfield lengths are based on ISO 8583 - 1987 version
+			bitfieldLength.put("BITFIELD1", 8);
+			bitfieldLength.put("BITFIELD2", -2);
+			bitfieldLength.put("BITFIELD3", 6);
+			bitfieldLength.put("BITFIELD4", 12);
+			bitfieldLength.put("BITFIELD5", 12);
+			bitfieldLength.put("BITFIELD6", 12);
+			bitfieldLength.put("BITFIELD7", 16);
+			bitfieldLength.put("BITFIELD8", 8);
+			bitfieldLength.put("BITFIELD9", 8);
+			bitfieldLength.put("BITFIELD10", 8);
+			bitfieldLength.put("BITFIELD11", 12);
+			bitfieldLength.put("BITFIELD12", 11);
+			bitfieldLength.put("BITFIELD13", 8);
+			bitfieldLength.put("BITFIELD14", 4);
+			bitfieldLength.put("BITFIELD15", 4);
+			bitfieldLength.put("BITFIELD16", 4);
+			bitfieldLength.put("BITFIELD17", 4);
+			bitfieldLength.put("BITFIELD18", 4);
+			bitfieldLength.put("BITFIELD19", 3);
+			bitfieldLength.put("BITFIELD20", 3);
+			bitfieldLength.put("BITFIELD21", 3);
+			bitfieldLength.put("BITFIELD22", 3);
+			bitfieldLength.put("BITFIELD23", 3);
+			bitfieldLength.put("BITFIELD24", 3);
+			bitfieldLength.put("BITFIELD25", 2);
+			bitfieldLength.put("BITFIELD26", 2);
+			bitfieldLength.put("BITFIELD27", 1);
+			bitfieldLength.put("BITFIELD28", -1);
+			bitfieldLength.put("BITFIELD29", -1);
+			bitfieldLength.put("BITFIELD30", -1);
+			bitfieldLength.put("BITFIELD31", -1);
+			bitfieldLength.put("BITFIELD32", -2);
+			bitfieldLength.put("BITFIELD33", -2);
+			bitfieldLength.put("BITFIELD34", -2);
+			bitfieldLength.put("BITFIELD35", -2);
+			bitfieldLength.put("BITFIELD36", -3);
+			bitfieldLength.put("BITFIELD37", 12);
+			bitfieldLength.put("BITFIELD38", 20);
+			bitfieldLength.put("BITFIELD39", 2);
+			bitfieldLength.put("BITFIELD40", 3);
+			bitfieldLength.put("BITFIELD41", 8);
+			bitfieldLength.put("BITFIELD42", 15);
+			bitfieldLength.put("BITFIELD43", 40);
+			bitfieldLength.put("BITFIELD44", -2);
+			bitfieldLength.put("BITFIELD45", -2);
+			bitfieldLength.put("BITFIELD46", -3);
+			bitfieldLength.put("BITFIELD47", -3);
+			bitfieldLength.put("BITFIELD48", -3);
+			bitfieldLength.put("BITFIELD49", 3);
+			bitfieldLength.put("BITFIELD50", 3);
+			bitfieldLength.put("BITFIELD51", 3);
+			bitfieldLength.put("BITFIELD52", 8);
+			bitfieldLength.put("BITFIELD53", 16);
+			bitfieldLength.put("BITFIELD54", -3);
+			bitfieldLength.put("BITFIELD55", -3);
+			bitfieldLength.put("BITFIELD56", -3);
+			bitfieldLength.put("BITFIELD57", -3);
+			bitfieldLength.put("BITFIELD58", -3);
+			bitfieldLength.put("BITFIELD59", -3);
+			bitfieldLength.put("BITFIELD60", -2);
+			bitfieldLength.put("BITFIELD61", -3);
+			bitfieldLength.put("BITFIELD62", -3);
+			bitfieldLength.put("BITFIELD63", -2);
+			bitfieldLength.put("BITFIELD64", 8);
+			bitfieldLength.put("BITFIELD65", 1);
+			bitfieldLength.put("BITFIELD66", 1);
+			bitfieldLength.put("BITFIELD67", 2);
+			bitfieldLength.put("BITFIELD68", 3);
+			bitfieldLength.put("BITFIELD69", 3);
+			bitfieldLength.put("BITFIELD70", 3);
+			bitfieldLength.put("BITFIELD71", 4);
+			bitfieldLength.put("BITFIELD72", 4);
+			bitfieldLength.put("BITFIELD73", 6);
+			bitfieldLength.put("BITFIELD74", 10);
+			bitfieldLength.put("BITFIELD75", 10);
+			bitfieldLength.put("BITFIELD76", 10);
+			bitfieldLength.put("BITFIELD77", 10);
+			bitfieldLength.put("BITFIELD78", 10);
+			bitfieldLength.put("BITFIELD79", 10);
+			bitfieldLength.put("BITFIELD80", 10);
+			bitfieldLength.put("BITFIELD81", 10);
+			bitfieldLength.put("BITFIELD82", 10);
+			bitfieldLength.put("BITFIELD83", 12);
+			bitfieldLength.put("BITFIELD84", 12);
+			bitfieldLength.put("BITFIELD85", 12);
+			bitfieldLength.put("BITFIELD86", 16);
+			bitfieldLength.put("BITFIELD87", 16);
+			bitfieldLength.put("BITFIELD88", 16);
+			bitfieldLength.put("BITFIELD89", 16);
+			bitfieldLength.put("BITFIELD90", 42);
+			bitfieldLength.put("BITFIELD91", 1);
+			bitfieldLength.put("BITFIELD92", 2);
+			bitfieldLength.put("BITFIELD93", 5);
+			bitfieldLength.put("BITFIELD94", 7);
+			bitfieldLength.put("BITFIELD95", 42);
+			bitfieldLength.put("BITFIELD96", 8);
+			bitfieldLength.put("BITFIELD97", -1);
+			bitfieldLength.put("BITFIELD98", 25);
+			bitfieldLength.put("BITFIELD99", -2);
+			bitfieldLength.put("BITFIELD100", -2);
+			bitfieldLength.put("BITFIELD101", -2);
+			bitfieldLength.put("BITFIELD102", -2);
+			bitfieldLength.put("BITFIELD103", -2);
+			bitfieldLength.put("BITFIELD104", -3);
+			bitfieldLength.put("BITFIELD105", -3);
+			bitfieldLength.put("BITFIELD106", -3);
+			bitfieldLength.put("BITFIELD107", -3);
+			bitfieldLength.put("BITFIELD108", -3);
+			bitfieldLength.put("BITFIELD109", -3);
+			bitfieldLength.put("BITFIELD110", -3);
+			bitfieldLength.put("BITFIELD111", -3);
+			bitfieldLength.put("BITFIELD112", -3);
+			bitfieldLength.put("BITFIELD113", -3);
+			bitfieldLength.put("BITFIELD114", -3);
+			bitfieldLength.put("BITFIELD115", -3);
+			bitfieldLength.put("BITFIELD116", -3);
+			bitfieldLength.put("BITFIELD117", -3);
+			bitfieldLength.put("BITFIELD118", -3);
+			bitfieldLength.put("BITFIELD119", -3);
+			bitfieldLength.put("BITFIELD120", -3);
+			bitfieldLength.put("BITFIELD121", -3);
+			bitfieldLength.put("BITFIELD122", -3);
+			bitfieldLength.put("BITFIELD123", -3);
+			bitfieldLength.put("BITFIELD124", -3);
+			bitfieldLength.put("BITFIELD125", -3);
+			bitfieldLength.put("BITFIELD126", -3);
+			bitfieldLength.put("BITFIELD127", -3);
+			bitfieldLength.put("BITFIELD128", 8);
+
 		}
-		
+
 	}
 }

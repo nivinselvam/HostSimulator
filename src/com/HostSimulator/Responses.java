@@ -411,8 +411,10 @@ public class Responses {
 					setBitfieldValue(Constants.nameOfbitfield37, Constants.valueOfBitfield37));
 
 		} else if (Main.fepName.equals("INCOMM")) {
-			responseBitfieldswithValue.put(Constants.nameOfbitfield5,
-					requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+			if(requestMTI.equals(Constants.financialSalesRequestMTI)) {
+				responseBitfieldswithValue.put(Constants.nameOfbitfield5,
+						requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+			}			
 		}
 
 	}

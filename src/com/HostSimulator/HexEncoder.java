@@ -72,7 +72,7 @@ public class HexEncoder {
 
 	public void encodeddata() {
 		try {
-			if (Main.fepName.equals("HPS")) {
+			if (Main.fepName.equals("HPS")||Main.fepName.equals("INCOMM")) {
 				encodeDataForHPS();
 			} else if (Main.fepName.equals("FCB")) {
 				encodeDataForFCB();
@@ -205,7 +205,11 @@ public class HexEncoder {
 		String finalHexData = "", lengthConvertedToHex;
 		String[] tempArray = hexData.split(" ");
 		int arrayLength, numberOfDigits;
-		arrayLength = (tempArray.length) + 2;
+		if(Main.fepName.equals("INCOMM")) {
+			arrayLength = (tempArray.length);
+		}else {
+			arrayLength = (tempArray.length) + 2;
+		}		
 		lengthConvertedToHex = Integer.toHexString(arrayLength);
 		numberOfDigits = lengthConvertedToHex.length();
 		switch (numberOfDigits) {

@@ -30,6 +30,7 @@ public class ServerConnection extends Thread {
 	public void sendStringtoClient(String text) {
 		try {
 			String tempString = converter.toHexString(text);
+			logger.debug("Data to be sent to client: "+tempString );
 			byte[] messageToClient = tempString.getBytes("ISO-8859-1");
 			int messageSize = messageToClient.length;
 			dout.writeShort(messageSize+2);
@@ -70,6 +71,8 @@ public class ServerConnection extends Thread {
 				int msgSize = 0;
 				if(Main.fepName.equals("HPS")) {
 					msgSize = din.readShort()-2;
+				}else if(Main.fepName.equals("INCOMM")){
+					msgSize = din.readShort();
 				}else {
 					msgSize = din.available();
 				}

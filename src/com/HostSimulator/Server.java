@@ -73,6 +73,7 @@ public class Server {
 			ss = new ServerSocket(15031);
 			SimulatorGUI gui = new SimulatorGUI();
 			System.out.println("Server started");
+			logger.info("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 			logger.info(Main.fepName+" Server started successfully");
 			gui.setServerStatus("Running");
 			while (shouldRun) {
