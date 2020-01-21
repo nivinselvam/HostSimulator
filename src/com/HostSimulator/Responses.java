@@ -10,7 +10,9 @@ package com.HostSimulator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -45,13 +47,15 @@ public class Responses {
 	// ----------------------------------------------------------------------------------------------------------------
 	public String echoMessageResponse() {
 		StringBuffer responsePacket = new StringBuffer(this.requestPacket);
-		if(Main.fepName.equals("HPS")) {
+		logger.debug("Echo Request: " + this.requestPacket);
+		if (Main.fepName.equals("HPS")) {
 			for (int i = 0; i < responsePacket.length(); i++) {
 				if (i == 8 || i == 9) {
 					responsePacket.setCharAt(i, '0');
 				}
 			}
-		}		
+		}
+		logger.debug("Echo Response: " + responsePacket);
 		return responsePacket.toString();
 	}
 
@@ -63,13 +67,14 @@ public class Responses {
 	// -------------------------------------------------------------------------------------------------------------------
 	public String getResponsePacket() {
 		String responsePacket = "";
+		logger.debug("Transaction request: " + this.requestPacket);
 		decoder = new HexDecoder(this.requestPacket);
 		eHeader = decoder.geteHeader();
 		requestMTI = decoder.getMTI();
 		requestBitfieldsWithValues = decoder.getBitFieldwithValues();
 		logger.info("Request Packet");
 		decoder.printEncodedData();
-		responseBitfieldswithValue = new TreeMap<>(new BitfieldComparator());
+		responseBitfieldswithValue = Collections.synchronizedMap(new TreeMap<>(new BitfieldComparator()));
 
 		if (requestMTI.equals(Constants.authorisationRequestMTI)) {
 			responsePacket = authorizationMessageResponse();
@@ -87,6 +92,7 @@ public class Responses {
 		decoder = new HexDecoder(responsePacket);
 		logger.info("Response Packet");
 		decoder.printEncodedData();
+		logger.debug("Transaction response: " + responsePacket);
 		return responsePacket;
 	}
 
@@ -153,6 +159,7 @@ public class Responses {
 		}
 
 		addFEPSpecificElements(Constants.authorisationRequestMTI, transactionResult);
+		removeBitfieldsWithNullValue();
 
 		HexEncoder encoder = new HexEncoder(Constants.authorisationResponseMTI, eHeader);
 		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
@@ -221,6 +228,7 @@ public class Responses {
 		}
 
 		addFEPSpecificElements(Constants.financialSalesRequestMTI, transactionResult);
+		removeBitfieldsWithNullValue();
 		HexEncoder encoder = new HexEncoder(responseMTI, eHeader);
 		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
 		encoder.setBitmap(bitmap);
@@ -267,6 +275,7 @@ public class Responses {
 			elementsInTransaction.add(44);
 		}
 		addFEPSpecificElements(Constants.reversalRequestMTI, transactionResult);
+		removeBitfieldsWithNullValue();
 		HexEncoder encoder = new HexEncoder(Constants.reversalResponseMTI, eHeader);
 		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
 		encoder.setBitmap(bitmap);
@@ -296,6 +305,7 @@ public class Responses {
 		responseBitfieldswithValue.put(Constants.nameOfbitfield48,
 				setBitfieldValue(Constants.nameOfbitfield48, Constants.valueOfBitfield48));
 		addFEPSpecificElements(Constants.reconsillationRequestMTI, transactionResult);
+		removeBitfieldsWithNullValue();
 		HexEncoder encoder = new HexEncoder(Constants.reconsillationResponseMTI, eHeader);
 		bitmap = encoder.tgenerateBinaryData(elementsInTransaction);
 		encoder.setBitmap(bitmap);
@@ -348,7 +358,7 @@ public class Responses {
 				return bitfield2Value.length() + bitfield2Value;
 			}
 		}
-		return "";
+		return null;
 	}
 
 	// ------------------------------------------------------------------------------------------------------------------
@@ -362,7 +372,7 @@ public class Responses {
 		for (Integer currentEntry : elementsInTransaction) {
 			String key = "BITFIELD" + currentEntry;
 			responseBitfieldswithValue.put(key, requestBitfieldsWithValues.get(key));
-			logger.debug(key+":"+requestBitfieldsWithValues.get(key)+" added to the response bitfield map");
+			logger.debug(key + ":" + requestBitfieldsWithValues.get(key) + " added to the response bitfield map");
 		}
 	}
 
@@ -386,45 +396,80 @@ public class Responses {
 
 	// ------------------------------------------------------------------------------------------------------------------
 	/*
-	 * This method is used to add HPS specific data elements Transaction type i.e.,
-	 * request MTI should be passed as argument
+	 * This method is used to add fep specific data elements according to the
+	 * Transaction type i.e., request MTI should be passed as argument
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public void addFEPSpecificElements(String transactionType, String transactionResult) {
 		if (Main.fepName.equals("HPS")) {
-			if (!transactionType.equals(Constants.reconsillationRequestMTI)) {
-				responseBitfieldswithValue.put(Constants.nameOfbitfield2,
-						generateBitfield2(requestBitfieldsWithValues));
-				isDE54RequiredForHPSTransaction(elementsInTransaction);
-			} else {
-				if (transactionResult.equals("Approve")) {
-					responseBitfieldswithValue.put(Constants.nameOfbitfield123,
-							setBitfieldValue(Constants.nameOfbitfield123, Constants.valueOfBitfield123));
-				}
-			}
+			addHpsSpecificElements(transactionType, transactionResult);
 		} else if (Main.fepName.equals("FCB")) {
-			sdf = new SimpleDateFormat("HHmmss");
-			responseBitfieldswithValue.put(Constants.nameOfbitfield12, sdf.format(date));
-			sdf = new SimpleDateFormat("MMdd");
-			responseBitfieldswithValue.put(Constants.nameOfbitfield13, sdf.format(date));
-			responseBitfieldswithValue.put(Constants.nameOfbitfield37,
-					setBitfieldValue(Constants.nameOfbitfield37, Constants.valueOfBitfield37));
+			addFCBSpecificElements();
 
 		} else if (Main.fepName.equals("INCOMM")) {
-			if(requestMTI.equals(Constants.financialSalesRequestMTI)) {
-				responseBitfieldswithValue.put(Constants.nameOfbitfield5,
-						requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
-			}			
+			addIncommSpecificElements();
 		}
 
 	}
+
+	private void addHpsSpecificElements(String transactionType, String transactionResult) {
+		if (!transactionType.equals(Constants.reconsillationRequestMTI)) {
+			try {
+				responseBitfieldswithValue.put(Constants.nameOfbitfield2,
+						generateBitfield2(requestBitfieldsWithValues));
+			} catch (NullPointerException e) {
+				logger.error("DE 2, DE 35, DE 45 unavailable to generate DE 2 in the response packet");
+			}			
+			isDE54RequiredForHPSTransaction(elementsInTransaction);
+		} else {
+			if (transactionResult.equals("Approve")) {
+				responseBitfieldswithValue.put(Constants.nameOfbitfield123,
+						setBitfieldValue(Constants.nameOfbitfield123, Constants.valueOfBitfield123));
+			}
+		}
+	}
+
+	private void addFCBSpecificElements() {
+		sdf = new SimpleDateFormat("HHmmss");
+		responseBitfieldswithValue.put(Constants.nameOfbitfield12, sdf.format(date));
+		sdf = new SimpleDateFormat("MMdd");
+		responseBitfieldswithValue.put(Constants.nameOfbitfield13, sdf.format(date));
+		responseBitfieldswithValue.put(Constants.nameOfbitfield37,
+				setBitfieldValue(Constants.nameOfbitfield37, Constants.valueOfBitfield37));
+	}
+
+	private void addIncommSpecificElements() {
+		if (requestMTI.equals(Constants.financialSalesRequestMTI)) {
+			if (requestBitfieldsWithValues.get(Constants.nameOfbitfield3).equals("189090")
+					|| requestBitfieldsWithValues.get(Constants.nameOfbitfield3).equals("299090")
+					|| requestBitfieldsWithValues.get(Constants.nameOfbitfield3).equals("319090")
+					|| requestBitfieldsWithValues.get(Constants.nameOfbitfield3).equals("289090")) {
+				responseBitfieldswithValue.put(Constants.nameOfbitfield5,
+						setBitfieldValue(Constants.nameOfbitfield4, Constants.valueOfBitfield4));
+				responseBitfieldswithValue.put(Constants.nameOfbitfield63,
+						setBitfieldValue(Constants.nameOfbitfield63, Constants.valueOfBitfield63));
+				responseBitfieldswithValue.put(Constants.nameOfbitfield102,
+						setBitfieldValue(Constants.nameOfbitfield102, Constants.valueOfBitfield102));
+			} else if (requestBitfieldsWithValues.get(Constants.nameOfbitfield3).equals("189191")) {
+				try {
+					responseBitfieldswithValue.put(Constants.nameOfbitfield2,
+							generateBitfield2(requestBitfieldsWithValues));
+				} catch (NullPointerException e) {
+					logger.error("DE 2, DE 35, DE 45 unavailable to generate DE 2 in the response packet");
+				}
+				responseBitfieldswithValue.put(Constants.nameOfbitfield46, setBitfieldValue(Constants.nameOfbitfield46, Constants.valueOfBitfield46));
+			}
+		} else if (requestMTI.equals(Constants.authorisationRequestMTI)) {
+
+		}
+	}
+
 	// ------------------------------------------------------------------------------------------------------------------
 	/*
 	 * This method is used to identify the bitfield and add length of bitfield if
 	 * required.
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
-
 	public static String setBitfieldValue(String bitfieldName, String bitfieldValue) {
 		int variableLengthValue;
 		String bitfieldLength;
@@ -452,6 +497,25 @@ public class Responses {
 			return bitfieldValue;
 		}
 
+	}
+
+	// ------------------------------------------------------------------------------------------------------------------
+	/*
+	 * This method is used to remove the bitfields that has null value in the
+	 * response bitfield map
+	 */
+	// ------------------------------------------------------------------------------------------------------------------
+	private void removeBitfieldsWithNullValue() {
+		Iterator<Map.Entry<String, String>> iterator = responseBitfieldswithValue.entrySet().iterator();		
+		while(iterator.hasNext()){
+			Map.Entry<String,String> currentEntry = iterator.next();
+			if (currentEntry.getValue() == null) {
+				elementsInTransaction.remove(Integer.parseInt(currentEntry.getKey().substring(8)));
+				iterator.remove();				
+				logger.debug("Value of " + currentEntry.getKey()
+						+ " is null. Hence the bitfield is removed from response bitfield map");
+			}
+		}
 	}
 
 }

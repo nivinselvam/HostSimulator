@@ -30,10 +30,14 @@ public class ServerConnection extends Thread {
 	public void sendStringtoClient(String text) {
 		try {
 			String tempString = converter.toHexString(text);
-			logger.debug("Data to be sent to client: "+tempString );
 			byte[] messageToClient = tempString.getBytes("ISO-8859-1");
 			int messageSize = messageToClient.length;
-			dout.writeShort(messageSize+2);
+			if(Main.fepName.equals("HPS")) {
+				messageSize = messageSize+2;
+			}
+			if(!Main.fepName.equals("FCB")){
+				dout.writeShort(messageSize);
+			}			
 			dout.write(messageToClient);
 			dout.flush();
 		} catch (IOException e) {
@@ -90,7 +94,7 @@ public class ServerConnection extends Thread {
 				logger.info("*************************************************************************************************");
 				logger.info("                                  Start of Transaction");
 				logger.info("*************************************************************************************************");
-				logger.debug(requestPacket.toString());
+				
 				String responsePacket = "";
 				if (msgSize < 33) {
 					responsePacket = responses.echoMessageResponse();

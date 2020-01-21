@@ -70,6 +70,7 @@ public final class Constants {
 	public static final String reversalResponseMTI = p.getProperty("reversalResponseMTI");
 	public static final String reconsillationRequestMTI = p.getProperty("reconsillationRequestMTI");
 	public static final String reconsillationResponseMTI = p.getProperty("reconsillationResponseMTI");
+
 	// BitFields involved in Transaction
 	public static final Integer[] elementsInAuthorisationTransaction = generateIntegerArrayFromString(
 			p.getProperty("elementsInAuthorisationTransaction"));
@@ -79,15 +80,16 @@ public final class Constants {
 			p.getProperty("elementsInReversalTransaction"));
 	public static final Integer[] elementsInReconsillationTransaction = generateIntegerArrayFromString(
 			p.getProperty("elementsInReconsillationTransaction"));
-	
+
 	// Codes to be validated during transaction
 	public static final List<String> balanceInquiryCodes = generateArrayListFromString(
 			p.getProperty("balanceInquiryCodes"));
 	public static final List<String> activationRechargeCodes = generateArrayListFromString(
 			p.getProperty("activationRechargeCodes"));
-	//Below constant is FCB fep specific
-	public static final List<Integer> elementsInHexFormatforFCBTransaction = new ArrayList<Integer>(Arrays.asList(37,38,39,41,42,60,63));
-		
+	// Below constant is FCB fep specific
+	public static final List<Integer> elementsInHexFormatforFCBTransaction = new ArrayList<Integer>(
+			Arrays.asList(37, 38, 39, 41, 42, 60, 63));
+
 	// BitField Names:
 	public static final String nameOfbitfield2 = "BITFIELD2";
 	public static final String nameOfbitfield3 = "BITFIELD3";
@@ -99,6 +101,7 @@ public final class Constants {
 	public static final String nameOfbitfield22 = "BITFIELD22";
 	public static final String nameOfbitfield24 = "BITFIELD24";
 	public static final String nameOfbitfield25 = "BITFIELD25";
+	public static final String nameOfbitfield32 = "BITFIELD32";
 	public static final String nameOfbitfield35 = "BITFIELD35";
 	public static final String nameOfbitfield37 = "BITFIELD37";
 	public static final String nameOfbitfield38 = "BITFIELD38";
@@ -107,11 +110,16 @@ public final class Constants {
 	public static final String nameOfbitfield42 = "BITFIELD42";
 	public static final String nameOfbitfield44 = "BITFIELD44";
 	public static final String nameOfbitfield45 = "BITFIELD45";
+	public static final String nameOfbitfield46 = "BITFIELD46";
 	public static final String nameOfbitfield48 = "BITFIELD48";
 	public static final String nameOfbitfield49 = "BITFIELD49";
 	public static final String nameOfbitfield53 = "BITFIELD53";
 	public static final String nameOfbitfield54 = "BITFIELD54";
 	public static final String nameOfbitfield55 = "BITFIELD55";
+	public static final String nameOfbitfield59 = "BITFIELD59";
+	public static final String nameOfbitfield63 = "BITFIELD63";
+	public static final String nameOfbitfield102 = "BITFIELD102";
+	public static final String nameOfbitfield104 = "BITFIELD104";
 	public static final String nameOfbitfield123 = "BITFIELD123";
 	// BitField Values:
 	public static final String valueOfBitfield4 = p.getProperty("valueOfBitfield4");
@@ -123,8 +131,12 @@ public final class Constants {
 	public static final String ValueOfBitfield39Reversal = p.getProperty("ValueOfBitfield39Reversal");
 	public static final String ValueOfBitfield39Reconsillation = p.getProperty("ValueOfBitfield39Reconsillation");
 	public static final String valueOfBitfield44 = p.getProperty("valueOfBitfield44");
+	public static final String valueOfBitfield46 = p.getProperty("valueOfBitfield46");
 	public static final String valueOfBitfield48 = p.getProperty("valueOfBitfield48");
 	public static final String valueOfBitfield54 = p.getProperty("valueOfBitfield54");
+	public static final String valueOfBitfield63 = p.getProperty("valueOfBitfield63");
+	public static final String valueOfBitfield102 = p.getProperty("valueOfBitfield102");
+	public static final String valueOfBitfield104 = p.getProperty("valueOfBitfield104");
 	public static final String valueOfBitfield123 = p.getProperty("valueOfBitfield123");
 	// Decoding details:
 	public static final Integer eHeaderStartPoint = Integer.parseInt(p.getProperty("eHeaderStartPoint"));
@@ -159,5 +171,5 @@ public final class Constants {
 		}
 		return elementsInTransactionList;
 	}
-	
+
 }
