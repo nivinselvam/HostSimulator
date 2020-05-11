@@ -20,6 +20,7 @@ public class ServerConnection extends Thread {
 	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 	Converter converter = new Converter();
 	Responses responses;
+
 	public ServerConnection(Socket socket, Server server) {
 		super("ServerConnectionThread");
 		this.socket = socket;
@@ -32,7 +33,7 @@ public class ServerConnection extends Thread {
 			String tempString = converter.toHexString(text);
 			byte[] messageToClient = tempString.getBytes("ISO-8859-1");
 			int messageSize = messageToClient.length;
-			dout.writeShort(messageSize+2);
+			dout.writeShort(messageSize + 2);
 			dout.write(messageToClient);
 			dout.flush();
 		} catch (IOException e) {
@@ -48,10 +49,25 @@ public class ServerConnection extends Thread {
 	//
 	// }
 
+	public void closeServer() throws IOException {
+		try {
+			if (dout != null)
+				dout.close();
+			if (din != null)
+				din.close();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		if (!socket.isClosed())
+			socket.close();
+		System.out.println("Server connection closed");
+		
+	}
+
 	public void run() {
 		String msgin = "", msgout = "";
-		System.out.println(socket.getRemoteSocketAddress().toString()+" is connected");
-		logger.info("Client "+socket.getRemoteSocketAddress().toString()+" is connected");
+		System.out.println(socket.getRemoteSocketAddress().toString() + " is connected");
+		logger.info("Client " + socket.getRemoteSocketAddress().toString() + " is connected");
 		try {
 			din = new DataInputStream(socket.getInputStream());
 			dout = new DataOutputStream(socket.getOutputStream());
@@ -65,39 +81,42 @@ public class ServerConnection extends Thread {
 					}
 
 				}
-				
-				//HPS Sends the Data length in the first 2 bytes but other FEPs don't send.
+							
+				// HPS Sends the Data length in the first 2 bytes but other FEPs don't send.
 				int msgSize = 0;
-				if(Main.fepName.equals("HPS")) {
-					msgSize = din.readShort()-2;
-				}else {
+				if (Main.fepName.equals("HPS")) {
+					msgSize = din.readShort() - 2;
+				} else {
 					msgSize = din.available();
 				}
 				
 				byte[] message = new byte[msgSize];
 				din.read(message, 0, msgSize);
-				
 
 				StringBuffer requestPacket = new StringBuffer();
 				for (byte currByte : message) {
 					requestPacket.append(String.format("%02x", currByte));
 				}
-				
+
 				responses = new Responses(requestPacket.toString());
-				logger.info("*************************************************************************************************");
+				logger.info(
+						"*************************************************************************************************");
 				logger.info("                                  Start of Transaction");
-				logger.info("*************************************************************************************************");
+				logger.info(
+						"*************************************************************************************************");
 				logger.debug(requestPacket.toString());
 				String responsePacket = "";
 				if (msgSize < 33) {
 					responsePacket = responses.echoMessageResponse();
 				} else {
 					responsePacket = responses.getResponsePacket();
-				}				
+				}
 				sendStringtoClient(responsePacket);
-				logger.info("*************************************************************************************************");
+				logger.info(
+						"*************************************************************************************************");
 				logger.info("                                   End of Transaction");
-				logger.info("*************************************************************************************************");
+				logger.info(
+						"*************************************************************************************************");
 			}
 			din.close();
 			dout.close();

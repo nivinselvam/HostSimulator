@@ -9,7 +9,6 @@
 package com.HostSimulator;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class BitFieldData {

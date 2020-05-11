@@ -3,5 +3,10 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="C:/Users/nivins1/Desktop/DevKit/Log/log4j-1.2.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/nivins1/eclipse-workspace/Packages/commons-configuration2-2.7-bin/commons-configuration2-2.7/commons-configuration2-2.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/nivins1/eclipse-workspace/Packages/commons-configuration2-2.7-bin/commons-configuration2-2.7/commons-configuration2-2.7-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/nivins1/eclipse-workspace/Packages/commons-configuration2-2.7-bin/commons-configuration2-2.7/commons-configuration2-2.7-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/nivins1/eclipse-workspace/Packages/commons-configuration2-2.7-bin/commons-configuration2-2.7/commons-configuration2-2.7-tests.jar"/>
+	<classpathentry kind="lib" path="C:/Users/nivins1/eclipse-workspace/Packages/commons-configuration2-2.7-bin/commons-configuration2-2.7/commons-configuration2-2.7-test-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

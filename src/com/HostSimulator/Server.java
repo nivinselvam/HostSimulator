@@ -1,5 +1,6 @@
 package com.HostSimulator;
 
+import java.io.IOException;
 import java.net.*;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
@@ -17,7 +18,7 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-public class Server {
+public class Server extends Thread{
 	
 	static {
 		TrustManager[] trustAllCertificates = new TrustManager[] { new X509TrustManager() {
@@ -63,28 +64,39 @@ public class Server {
 	}
 	final static Logger logger = Logger.getLogger(Server.class);
 	
-	ServerSocket ss;
+	public ServerSocket serverSocket;
+	public Socket socket;
 	ArrayList<ServerConnection> connections = new ArrayList<ServerConnection>();
-	boolean shouldRun = true;
-
+	boolean shouldRun = true , serverStarted = false;
+	
+	public String serverStatus = "";
+	public ServerConnection serverConnection;
 	public Server() {
+				
+	}
+	
+
+	public void run() {
 		try {
 			PropertyConfigurator.configure("log4j.properties");
-			ss = new ServerSocket(15031);
-			SimulatorGUI gui = new SimulatorGUI();
+			serverSocket = new ServerSocket(15031);	
+			serverStarted = true;
 			System.out.println("Server started");
+			serverStatus = "Server Started";
 			logger.info(Main.fepName+" Server started successfully");
-			gui.setServerStatus("Running");
 			while (shouldRun) {
-				Socket s = ss.accept();
-				ServerConnection sc = new ServerConnection(s, this);
-				sc.start();
-				connections.add(sc);
-			}
+				socket = serverSocket.accept();
+				serverConnection = new ServerConnection(socket, this);
+				serverConnection.start();
+				connections.add(serverConnection);
+			}			
 		} catch (Exception e) {
+			serverStarted = false;
 			logger.fatal("Unable to start the server");
+			serverStatus = ("Unable to start the server");
+			e.printStackTrace();
 		}
-
 	}
+	
 
 }
