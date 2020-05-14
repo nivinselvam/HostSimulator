@@ -71,6 +71,7 @@ public class Server extends Thread{
 	
 	public String serverStatus = "";
 	public ServerConnection serverConnection;
+	int portNumber = Integer.parseInt(Main.window.getPortNumber());
 	public Server() {
 				
 	}
@@ -79,7 +80,7 @@ public class Server extends Thread{
 	public void run() {
 		try {
 			PropertyConfigurator.configure("log4j.properties");
-			serverSocket = new ServerSocket(15031);	
+			serverSocket = new ServerSocket(portNumber);	
 			serverStarted = true;
 			System.out.println("Server started");
 			serverStatus = "Server Started";
@@ -98,5 +99,4 @@ public class Server extends Thread{
 		}
 	}
 	
-
 }

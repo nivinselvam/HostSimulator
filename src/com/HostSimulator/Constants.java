@@ -21,7 +21,7 @@ public final class Constants {
 		PropertyConfigurator.configure("log4j.properties");
 		switch (Main.fepName) {
 		case "HPS":
-			fepFile = "HPSConstants.properties";
+			fepFile = "C:\\Users\\nivins1\\eclipse-workspace\\HostSimulator\\HPSConstants.properties";
 			break;
 		case "FCB":
 			fepFile = "FCBConstants.properties";

@@ -23,7 +23,7 @@ public class HexDecoder {
 		}
 
 	}
-
+	
 	public int getDataLength() {
 		return dataLength;
 	}

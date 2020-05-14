@@ -45,13 +45,13 @@ public class Responses {
 	// ----------------------------------------------------------------------------------------------------------------
 	public String echoMessageResponse() {
 		StringBuffer responsePacket = new StringBuffer(this.requestPacket);
-		if(Main.fepName.equals("HPS")) {
+		if (Main.fepName.equals("HPS")) {
 			for (int i = 0; i < responsePacket.length(); i++) {
 				if (i == 8 || i == 9) {
 					responsePacket.setCharAt(i, '0');
 				}
 			}
-		}		
+		}
 		return responsePacket.toString();
 	}
 
@@ -98,34 +98,58 @@ public class Responses {
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String authorizationMessageResponse() {
-		String transactionResult = Constants.authorizationTransactionResponse;
+		String transactionResult = Main.window.getTransactionResult().replace(" ", "");
 		String responsePacket = "", bitmap, bitfield4 = "";
 		elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInAuthorisationTransaction));
 		generateResponseBitfieldswithValue(elementsInTransaction);
 		boolean isBalanceInquiry = false;
 		if (Constants.balanceInquiryCodes.contains(requestBitfieldsWithValues.get(Constants.nameOfbitfield3))) {
 			isBalanceInquiry = true;
-			bitfield4 = Constants.valueOfBitfield4;
 			// Partial approval is not applicable for balance inquiry.
 			if (transactionResult.equals("PartiallyApprove")) {
 				transactionResult = "Approve";
 			}
+			if(transactionResult.equals("Decline")) {
+				bitfield4 = "000000000000";
+			}else {
+				bitfield4 = Constants.valueOfBitfield4;
+			}
+				
 		}
-		switch (transactionResult) {
-		case "Approve":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
-					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval));
-			break;
-		case "Decline":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
-					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
-			break;
-		case "PartiallyApprove":
-			bitfield4 = generateHalfAmountForPartialApproval(requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
-					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial));
-			break;
+//		switch (transactionResult) {
+//		case "Approve":
+//			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+//					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval));
+//			break;
+//		case "Decline":
+//			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+//					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
+//			break;
+//		case "PartiallyApprove":
+//			bitfield4 = generateHalfAmountForPartialApproval(requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+//			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+//					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial));
+//			break;
+//		}
+
+		if (transactionResult.equals("PartiallyApprove")) {
+			if (Main.window.getApprovalAmount().equals("half")) {
+				bitfield4 = generateHalfAmountForPartialApproval(
+						requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+			} else {
+				if (Double.parseDouble(Main.window.getApprovalAmount()) > Double
+						.parseDouble(requestBitfieldsWithValues.get(Constants.nameOfbitfield4))) {
+					bitfield4 = generateHalfAmountForPartialApproval(
+							requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+				} else {
+					bitfield4 = Main.window.getApprovalAmount();
+				}
+
+			}
 		}
+
+		responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+				setBitfieldValue(Constants.nameOfbitfield39, Main.window.getResponseCode()));
 		// Bitfields for which the values should be generated.
 		if (transactionResult.equals("PartiallyApprove") || isBalanceInquiry) {
 			responseBitfieldswithValue.put(Constants.nameOfbitfield4,
@@ -177,7 +201,8 @@ public class Responses {
 		// since financial transaction can have sales and force draft requests
 		if (requestMTI.equals(Constants.financialSalesRequestMTI)) {
 			responseMTI = Constants.financialSalesResponseMTI;
-			transactionResult = Constants.financialSalesTransactionResponse;
+			transactionResult = Main.window.getTransactionResult().replace(" ", "");
+			;
 			// Activation and Recharges transaction should not have partial approval
 			if (Constants.activationRechargeCodes.contains(requestBitfieldsWithValues.get(Constants.nameOfbitfield3))
 					&& transactionResult.equals("PartiallyApprove")) {
@@ -185,28 +210,51 @@ public class Responses {
 			}
 		} else if (requestMTI.equals(Constants.financialForceDraftRequestMTI)) {
 			responseMTI = Constants.financialForceDraftResponseMTI;
-			transactionResult = Constants.financialForceDraftTransactionResponse;
+			transactionResult = Main.window.getTransactionResult().replace(" ", "");
 			if (transactionResult.equals("PartiallyApprove")) {
 				transactionResult = "Approve";
 			}
 		}
-		switch (transactionResult) {
-		case "Approve":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
-					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval));
-			break;
-		case "Decline":
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
-					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
-			break;
-		case "PartiallyApprove":
-			bitfield4 = generateHalfAmountForPartialApproval(requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+//		switch (transactionResult) {
+//		case "Approve":
+//			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+//					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Approval));
+//			break;
+//		case "Decline":
+//			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+//					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
+//			break;
+//		case "PartiallyApprove":
+//			bitfield4 = generateHalfAmountForPartialApproval(requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+//			responseBitfieldswithValue.put(Constants.nameOfbitfield4,
+//					requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+//			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+//					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial));
+//			break;
+//		}
+
+		if (transactionResult.equals("PartiallyApprove")) {
+			if (Main.window.getApprovalAmount().equals("half")) {
+				bitfield4 = generateHalfAmountForPartialApproval(
+						requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+			} else {
+				if (Double.parseDouble(Main.window.getApprovalAmount()) > Double
+						.parseDouble(requestBitfieldsWithValues.get(Constants.nameOfbitfield4))) {
+					bitfield4 = generateHalfAmountForPartialApproval(
+							requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
+				} else {
+					bitfield4 = Main.window.getApprovalAmount();
+				}
+
+			}
+
 			responseBitfieldswithValue.put(Constants.nameOfbitfield4,
-					requestBitfieldsWithValues.get(Constants.nameOfbitfield4));
-			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
-					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Partial));
-			break;
+					bitfield4);
 		}
+
+		responseBitfieldswithValue.put(Constants.nameOfbitfield39,
+				setBitfieldValue(Constants.nameOfbitfield39, Main.window.getResponseCode()));
+
 		// Bitfields for which the values should be generated.
 
 		if (transactionResult.equals("Approve") || transactionResult.equals("PartiallyApprove")) {
@@ -246,7 +294,10 @@ public class Responses {
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String reversalMessageResponse() {
-		String transactionResult = Constants.reversalTransactionResponse;
+		String transactionResult = Main.window.getTransactionResult();
+		if (transactionResult.equals("PartiallyApprove")) {
+			transactionResult = "Approve";
+		}
 		String responsePacket = "", bitmap, bitfield39 = "";
 		elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInReversalTransaction));
 		generateResponseBitfieldswithValue(elementsInTransaction);
@@ -261,7 +312,7 @@ public class Responses {
 			elementsInTransaction.add(38);
 		} else {
 			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
-					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
+					setBitfieldValue(Constants.nameOfbitfield39, Main.window.getResponseCode()));
 			responseBitfieldswithValue.put(Constants.nameOfbitfield44,
 					setBitfieldValue(Constants.nameOfbitfield44, Constants.valueOfBitfield44));
 			elementsInTransaction.add(44);
@@ -282,7 +333,10 @@ public class Responses {
 	 */
 	// ------------------------------------------------------------------------------------------------------------------
 	public String reconciliationMessageResponse() {
-		String responsePacket = "", bitmap, transactionResult = Constants.reversalTransactionResponse;
+		String responsePacket = "", bitmap, transactionResult = Main.window.getTransactionResult();
+		if (transactionResult.equals("PartiallyApprove")) {
+			transactionResult = "Approve";
+		}
 		elementsInTransaction = new TreeSet<>(Arrays.asList(Constants.elementsInReconsillationTransaction));
 		generateResponseBitfieldswithValue(elementsInTransaction);
 		// Bitfields for which the values should be generated.
@@ -291,7 +345,7 @@ public class Responses {
 					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Reconsillation));
 		} else {
 			responseBitfieldswithValue.put(Constants.nameOfbitfield39,
-					setBitfieldValue(Constants.nameOfbitfield39, Constants.ValueOfBitfield39Decline));
+					setBitfieldValue(Constants.nameOfbitfield39, Main.window.getResponseCode()));
 		}
 		responseBitfieldswithValue.put(Constants.nameOfbitfield48,
 				setBitfieldValue(Constants.nameOfbitfield48, Constants.valueOfBitfield48));
@@ -362,7 +416,7 @@ public class Responses {
 		for (Integer currentEntry : elementsInTransaction) {
 			String key = "BITFIELD" + currentEntry;
 			responseBitfieldswithValue.put(key, requestBitfieldsWithValues.get(key));
-			logger.debug(key+":"+requestBitfieldsWithValues.get(key)+" added to the response bitfield map");
+			logger.debug(key + ":" + requestBitfieldsWithValues.get(key) + " added to the response bitfield map");
 		}
 	}
 
